@@ -1,0 +1,15 @@
+{
+  "name": "@sanalabs/mutate-json",
+  "version": "0.1.0",
+  "description": "Utility functions to mutate JSON object",
+  "main": "index.js",
+  "scripts": {},
+  "license": "ISC",
+  "dependencies": {
+    "fast-json-patch": "^3.1.0",
+    "lodash.merge": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/lodash.merge": "^4.6.6"
+  }
+}

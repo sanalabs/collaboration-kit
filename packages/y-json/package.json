@@ -1,0 +1,11 @@
+{
+  "name": "@sanalabs/y-json",
+  "version": "0.1.0",
+  "description": "Transform Yjs Shared Types according to a JSON object",
+  "main": "index.js",
+  "scripts": {},
+  "license": "ISC",
+  "dependencies": {
+    "yjs": "^13.5.16"
+  }
+}

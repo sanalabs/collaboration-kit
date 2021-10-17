@@ -1,0 +1,7 @@
+{
+  "name": "@sanalabs/json",
+  "version": "0.1.0",
+  "description": "Utility functions to work with JSON",
+  "scripts": {},
+  "license": "ISC"
+}

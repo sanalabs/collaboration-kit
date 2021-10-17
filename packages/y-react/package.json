@@ -1,0 +1,14 @@
+{
+  "name": "@sanalabs/y-react",
+  "version": "0.1.0",
+  "description": "Yjs for React",
+  "scripts": {},
+  "license": "ISC",
+  "dependencies": {
+    "react": "^17.0.2",
+    "yjs": "^13.5.16"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.30"
+  }
+}
