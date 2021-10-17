@@ -4,9 +4,8 @@ Monorepo for packages that facilitate working with arbitrary JSON structures in 
 
 - `y-react` React state synced with Yjs (TODO Jesper)
 - `y-redux` Redux state synced with Yjs
-- `y-json` Utility functions to translate between Yjs and JSON and vice versa
-- `json-mutate` Utility functions to mutate JSON (patch and merge)
-- `json` Utility functions to validate JSON
+- `y-json` Utility functions to mutate Yjs types according to a target JSON object
+- `json` Utility functions to validate and mutate JSON (patch and merge)
 
 ## Principles
 

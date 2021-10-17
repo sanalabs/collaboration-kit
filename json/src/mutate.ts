@@ -1,6 +1,6 @@
 import { applyPatch, compare } from 'fast-json-patch'
 import merge from 'lodash.merge'
-import { assertIsJson } from '../json/src'
+import { assertIsJson } from './validate'
 
 export function patchJson<T extends Record<string, unknown> | Array<unknown>>(
   objectToMutate: T,

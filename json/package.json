@@ -1,7 +1,14 @@
 {
   "name": "@sanalabs/json",
   "version": "0.1.0",
-  "description": "Utility functions to validate JSON",
+  "description": "Utility functions to validate and mutate JSON (patch and merge)",
   "scripts": {},
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "fast-json-patch": "^3.1.0",
+    "lodash.merge": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/lodash.merge": "^4.6.6"
+  }
 }
