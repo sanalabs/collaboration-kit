@@ -1,7 +1,7 @@
 {
-  "name": "@sanalabs/mutate-json",
+  "name": "@sanalabs/json-mutate",
   "version": "0.1.0",
-  "description": "Utility functions to mutate JSON object",
+  "description": "Utility functions to mutate JSON (patch and merge)",
   "main": "index.js",
   "scripts": {},
   "license": "ISC",

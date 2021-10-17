@@ -1,7 +1,7 @@
 {
   "name": "@sanalabs/json",
   "version": "0.1.0",
-  "description": "Utility functions to work with JSON",
+  "description": "Utility functions to validate JSON",
   "scripts": {},
   "license": "ISC"
 }

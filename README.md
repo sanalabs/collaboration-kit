@@ -1,52 +1,39 @@
-# "y-json" NAME IS WIP - each package has it's own name, this is a monorepo for multiple packages
+# Collaboration Kit
 
-A set of tools to facilitate working with arbitrary JSON structures in Yjs.
+Monorepo for packages that facilitate working with arbitrary JSON structures in Yjs.
 
 * `y-react` React state synced with Yjs (TODO Jesper)
 * `y-redux` Redux state synced with Yjs
 * `y-json` Utility functions to translate between Yjs and JSON and vice versa
+* `json-mutate` Utility functions to mutate JSON (patch and merge)
+* `json` Utility functions to validate JSON
 
-## What is valid JSON data?
 
-Valid JSON is one of the following TypeScript types:
-* `string`
-* `number`
-* `boolean`
-* `null`
-* `Array<unknown>`
-* `Record<string, unknown>`
+## Principles
 
-### How is `unknown` handled?
+### Strict typing (compile-time) and validation (run-time)
 
-`unknown` is not a valid JSON type. However, a property wih value `undefined` in JavaScript is to be considered equivalent to that property not existing. For example:
+* Typed with TypeScript
+* Assertions in runtime to guarantee that no corrupt data gets propagated
+
+### Ban `undefined`
+
+`unknown` is not a valid JSON type. However, a property wih value `undefined` in JavaScript is in some contexts considered equivalent to that property not existing. For example:
 ```js
 JSON.stringify({ prop: undefined }) === JSON.stringify({}) // '{}'
 ```
-Also note that
+But not always:
+```js
+JSON.stringify([undefined]) === JSON.stringify([null]) // WTF
+```
+It's actually quite confusing:
 ```js
 const obj = { a: undefined }
 obj.a === obj.b // true
-```
-but
-```js
 Object.keys(obj) // ['a']
 ```
-It is even more confusing for arrays
 
-## `undefined` is ambiguous in javascript
-
-To increase the strictness and predictability of the code, remove you `undefined`s completely before
-
-This is why `isJsonPrimitive(undefined) === false`.
-
-
-Whenever a value is set to undefined in JS, JSON-Patch methods generate and compare will treat it similarly to how JavaScript method JSON.stringify (MDN) treats them:
-
-[`JSON.stringify` (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) treats undefined differently depending on context:
-
-> If `undefined` (...) is encountered during conversion it is either omitted (when it is found in an object) or censored to `null` (when it is found in an array).
-
-We want to simply avoid this, so all JSON must not contain `undefined`.
+To increase the strictness and predictability of the code, Collaboration Kit strictly prohibits undefined to be passed around. This is achieved through runtime assertions, see [`json`](https://github.com/sanalabs/collaboration-kit/tree/main/json)
 
 
 # Prior art

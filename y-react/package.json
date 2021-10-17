@@ -1,7 +1,7 @@
 {
   "name": "@sanalabs/y-react",
   "version": "0.1.0",
-  "description": "Yjs for React",
+  "description": "React state synced with Yjs",
   "scripts": {},
   "license": "ISC",
   "dependencies": {
