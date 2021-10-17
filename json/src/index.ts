@@ -33,10 +33,9 @@ export function assertIsArray(val: unknown): asserts val is unknown[] {
 function isPlainObject(val: unknown): val is PlainObject {
   if (typeof val !== 'object') return false
   if (val === null) return false
-  if (val === undefined) return false
   if (Object.prototype.toString.call(val) !== '[object Object]') return false
 
-  let proto = val
+  let proto: unknown = val
   while (Object.getPrototypeOf(proto) !== null) {
     proto = Object.getPrototypeOf(proto)
   }

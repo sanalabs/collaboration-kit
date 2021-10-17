@@ -4,7 +4,7 @@ import { assertIsJson } from '../json/src'
 
 export function patchJson<T extends Record<string, unknown> | Array<unknown>>(
   objectToMutate: T,
-  newState: T
+  newState: T,
 ): void {
   assertIsJson(objectToMutate)
   assertIsJson(newState)
@@ -13,7 +13,7 @@ export function patchJson<T extends Record<string, unknown> | Array<unknown>>(
 
 export function mergeJson<T extends Record<string, unknown> | Array<unknown>>(
   objectToMutate: T,
-  newState: T
+  newState: T,
 ): void {
   assertIsJson(objectToMutate)
   assertIsJson(newState)

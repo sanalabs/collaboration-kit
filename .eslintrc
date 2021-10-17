@@ -1,0 +1,83 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "import"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/typescript",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "modules": true
+    },
+    "project": "./tsconfig.json"
+  },
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "rules": {
+    "@typescript-eslint/unbound-method": ["error", { "ignoreStatic": true }],
+    "no-unused-vars": "off", // Must disable the base rule as it can report incorrect errors
+    "@typescript-eslint/no-unused-vars": ["error", { "ignoreRestSiblings": true }],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      { "selector": "variableLike", "format": ["camelCase", "PascalCase"] }
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true
+      }
+    ],
+    "no-extra-semi": "off",
+    "@typescript-eslint/no-extra-semi": "off",
+    "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
+    "eqeqeq": "error",
+    "no-extra-boolean-cast": "error",
+    "require-await": "off",
+    "@typescript-eslint/require-await": "off", // This interferes with the case of having a callback that is typed to return a promise but you don't use await in the body
+    "@typescript-eslint/prefer-regexp-exec": "error",
+    "@typescript-eslint/ban-ts-comment": "error",
+    "@typescript-eslint/no-use-before-define": "error",
+    "@typescript-eslint/no-empty-interface": "off",
+    "@typescript-eslint/no-var-requires": "error",
+    "@typescript-eslint/no-inferrable-types": "error",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/prefer-includes": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/ban-types": "error",
+    "@typescript-eslint/no-unsafe-member-access": "error",
+    "@typescript-eslint/no-unsafe-call": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/prefer-optional-chain": "off",
+    "@typescript-eslint/prefer-for-of": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/no-unnecessary-condition": "error",
+    "@typescript-eslint/no-floating-promises": [
+      "error",
+      {
+        "ignoreVoid": true
+      }
+    ],
+    "no-return-await": "off",
+    "@typescript-eslint/return-await": "error",
+    "no-unreachable": "error",
+    "import/no-default-export": "error",
+    "import/no-anonymous-default-export": "error",
+    "prefer-const": "error",
+    "no-else-return": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/member-delimiter-style": "off", // Covered by prettier
+    "@typescript-eslint/explicit-module-boundary-types": "off", // We're covered by @typescript-eslint/explicit-function-return-type
+    "@typescript-eslint/no-unsafe-return": "error",
+    "@typescript-eslint/restrict-template-expressions": "error",
+    "@typescript-eslint/restrict-plus-operands": "error"
+  }
+}

@@ -29,7 +29,7 @@ export const SyncYMap = <T extends Record<string, unknown>>({
   useEffect(() => {
     const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
       if (!transaction.local) {
-        dispatch(setData(yMap.toJSON()))
+        dispatch(setData(yMap.toJSON() as T))
       }
     }
 

@@ -11,4 +11,3 @@ See `./example`
 ## Additional notes
 
 - Although possible, one should generally avoid to write to a `Y.Doc` before it has been synced.
-

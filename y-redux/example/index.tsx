@@ -1,7 +1,9 @@
+import { useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import * as Y from 'yjs'
 import { SyncYAwareness, SyncYMap } from '../src'
+import { setAwarenessStates, setData } from './actions'
 import { selectData, selectLocalAwarenessState } from './selectors'
-import { setData, setAwarenessStates } from './actions'
 
 // redux state = { data1: 123, deepData: { data2: 123 } }
 
@@ -26,17 +28,12 @@ const YRedux = (): JSX.Element => {
       yDoc.destroy()
       yProvider.destroy()
     },
-    [yDoc, yProvider, dispatch]
+    [yDoc, yProvider, dispatch],
   )
 
   return (
     <>
-      <SyncYMap
-        yMap={yMap}
-        setData={setData}
-        selectData={selectData}
-        decodeData={decodeData}
-      />
+      <SyncYMap yMap={yMap} setData={setData} selectData={selectData} decodeData={decodeData} />
       <SyncYAwareness
         awareness={yProvider.awareness}
         setAwarenessStates={setAwarenessStates}
@@ -48,13 +45,16 @@ const YRedux = (): JSX.Element => {
 }
 
 const Comp1 = (): JSX.Element => {
+  const dispatch = useDispatch()
   const data1 = useSelector(selectData1)
 
   return (
     <div>
-      <p>Component 1 rendered at {new Date.toISOString()}</p>
-      <p>Data 1 = {data1}</p>
-      <p><button onClick={() => dispatch(setData1(Math.random()))}>Update 1</button></p>
+      <p>Component 1 rendered at {new Date().toISOString()}</p>
+      <p>data1 = {data1}</p>
+      <p>
+        <button onClick={() => dispatch(setData1(Math.random()))}>Update 1</button>
+      </p>
     </div>
   )
 }
@@ -64,14 +64,16 @@ const Comp2 = (): JSX.Element => {
 
   return (
     <div>
-      <p>Component 2 rendered at {new Date.toISOString()}</p>
-      <p>Data 2 = {data2}</p>
-      <p><button onClick={() => dispatch(setData1(Math.random()))}>Update 2</button></p>
+      <p>Component 2 rendered at {new Date().toISOString()}</p>
+      <p>data2 = {data2}</p>
+      <p>
+        <button onClick={() => dispatch(setData1(Math.random()))}>Update 2</button>
+      </p>
     </div>
   )
 }
 
-const App = (): JSX.Element => (
+export const App = (): JSX.Element => (
   <>
     <YRedux />
 

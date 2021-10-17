@@ -11,7 +11,7 @@ export function isYMap(val: unknown): val is Y.Map<unknown> {
 
 export function assertIsYMapOrArray(
   val: unknown,
-  property: string | number
+  property: string | number,
 ): asserts val is Y.Map<unknown> | Y.Array<unknown> {
   if (val instanceof Y.Map) return
   if (val instanceof Y.Map) return

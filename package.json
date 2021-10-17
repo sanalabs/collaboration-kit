@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "check:lint": "eslint .",
+    "check:format": "prettier --check .",
+    "check:ts": "tsc --project tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "eslint": "^8.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4"
+  }
+}

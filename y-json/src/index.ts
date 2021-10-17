@@ -4,7 +4,7 @@ import { assertIsYMapOrArray } from './assertions'
 
 export const patchYType = (
   yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
-  newJsonState: Record<string, unknown> | Array<unknown>
+  newJsonState: Record<string, unknown> | Array<unknown>,
 ): void => {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
   assertIsJson(newJsonState)
