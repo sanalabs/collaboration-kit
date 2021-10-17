@@ -4,13 +4,17 @@
   "description": "Redux state synced with Yjs",
   "scripts": {},
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
+    "@types/react": "^17.0.30",
     "react": "^17.0.2",
     "react-redux": "^7.2.5",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.16"
   },
-  "devDependencies": {
-    "@types/react": "^17.0.30"
+  "peerDependencies": {
+    "react": "*",
+    "react-redux": "*",
+    "y-protocols": "*",
+    "yjs": "*"
   }
 }
