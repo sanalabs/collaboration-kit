@@ -35,7 +35,7 @@ const obj = { a: undefined }
 obj.a === obj.b // true
 ```
 
-To increase the strictness and predictability of the code, Collaboration Kit strictly prohibits undefined to be passed around. This is achieved through runtime assertions, see [`json`](https://github.com/sanalabs/collaboration-kit/tree/main/json).
+To increase the strictness and predictability of the code, Collaboration Kit strictly prohibits undefined to be passed around. This is achieved through runtime assertions, see [`json`](https://github.com/sanalabs/collaboration-kit/tree/main/json). If you like this, you may be interested in the typescript compiler option [`exactOptionalPropertyTypes`](https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes).
 
 ### No excessive package dependencies
 
