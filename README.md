@@ -2,10 +2,10 @@
 
 Monorepo for packages that facilitate working with arbitrary JSON structures in [Yjs](https://github.com/yjs/yjs).
 
-- `y-react` React state synced with Yjs (TODO Jesper)
-- `y-redux` Redux state synced with Yjs
-- `y-json` Utility functions to mutate Yjs types according to a target JSON object
-- `json` Utility functions to validate and mutate JSON (patch and merge)
+- `@sanalabs/y-react` React state synced with Yjs (TODO Jesper)
+- `@sanalabs/y-redux` Redux state synced with Yjs
+- `@sanalabs/y-json` Utility functions to mutate Yjs types according to a target JSON object
+- `@sanalabs/json` Utility functions to validate and mutate JSON (patch and merge)
 
 ## Principles
 
