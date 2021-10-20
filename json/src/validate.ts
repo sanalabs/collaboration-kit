@@ -5,8 +5,9 @@ export function mkErr(val: unknown, type: string): AssertionError {
 }
 
 export type JsonPrimitive = string | number | boolean | null
-export type PlainObject = Record<string, unknown>
-export type JsonContainer = PlainObject | unknown[]
+export type PlainObject = { [key: string]: Json }
+export type PlainArray = Json[]
+export type JsonContainer = PlainObject | PlainArray
 export type Json = JsonPrimitive | JsonContainer
 
 export function isJsonPrimitive(val: unknown): val is JsonPrimitive {
@@ -21,16 +22,16 @@ export function assertIsJsonPrimitive(val: unknown): asserts val is JsonPrimitiv
   if (!isJsonPrimitive(val)) throw mkErr(val, 'JSON primitive (string | number | boolean | null)')
 }
 
-export function isArray(val: unknown): val is unknown[] {
+export function isPlainArray(val: unknown): val is PlainArray {
   return Array.isArray(val)
 }
 
 export function assertIsArray(val: unknown): asserts val is unknown[] {
-  if (!isArray(val)) throw mkErr(val, 'array')
+  if (!isPlainArray(val)) throw mkErr(val, 'array')
 }
 
 // Based on https://github.com/lodash/lodash/blob/master/isPlainObject.js
-function isPlainObject(val: unknown): val is PlainObject {
+export function isPlainObject(val: unknown): val is PlainObject {
   if (typeof val !== 'object') return false
   if (val === null) return false
   if (Object.prototype.toString.call(val) !== '[object Object]') return false
@@ -47,17 +48,17 @@ export function assertIsPlainObject(val: unknown): asserts val is PlainObject {
 }
 
 export function isJsonContainer(val: unknown): val is JsonContainer {
-  return isPlainObject(val) || isArray(val)
+  return isPlainObject(val) || isPlainArray(val)
 }
 
 export function assertIsJsonContainer(val: unknown): asserts val is Record<string, unknown> | unknown[] {
   if (!isJsonContainer(val)) throw mkErr(val, 'plain object or array')
 }
 
-export function assertIsJson(val: unknown): void {
+export function assertIsJson(val: unknown): asserts val is Json {
   if (isPlainObject(val)) {
     Object.values(val).forEach(assertIsJson)
-  } else if (isArray(val)) {
+  } else if (isPlainArray(val)) {
     val.forEach(assertIsJson)
   } else {
     assertIsJsonPrimitive(val)
@@ -65,7 +66,7 @@ export function assertIsJson(val: unknown): void {
 }
 
 // Remove undefined from objects and replace undefined with null in arrays
-export function normalizeJson(val: Record<string, unknown> | unknown[]): void {
+export function normalizeJson(val: PlainObject | PlainArray): void {
   assertIsJsonContainer(val)
   if (isPlainObject(val)) {
     for (const key in val) {
@@ -78,7 +79,7 @@ export function normalizeJson(val: Record<string, unknown> | unknown[]): void {
         assertIsJsonPrimitive(val)
       }
     }
-  } else if (isArray(val)) {
+  } else if (isPlainArray(val)) {
     for (let i = 0; i < val.length; i++) {
       const innerVal = val[i]
       if (innerVal === undefined) {
