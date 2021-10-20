@@ -5,7 +5,7 @@ export function mkErr(val: unknown, type: string): AssertionError {
 }
 
 export type JsonPrimitive = string | number | boolean | null
-export type PlainObject = Record<string, unknown>
+export type PlainObject = { [key: string]: Json }
 export type PlainArray = Json[]
 export type JsonContainer = PlainObject | PlainArray
 export type Json = JsonPrimitive | JsonContainer
