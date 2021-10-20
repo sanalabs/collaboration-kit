@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "description": "Transform Yjs Shared Types according to a JSON object",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test-local": "jest"
+  },
   "license": "ISC",
   "dependencies": {
+    "@types/lodash": "^4.14.175",
+    "lodash": "^4.17.21",
     "yjs": "^13.5.16"
   }
 }
