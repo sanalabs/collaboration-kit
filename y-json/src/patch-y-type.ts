@@ -55,6 +55,10 @@ function applyDiff(yType: Y.Map<unknown> | Y.Array<unknown>, diff: Diff): void {
   }
 }
 
+/**
+ * Mutate a Y.Map or Y.Array into the given `newState`.
+ * The mutations will be batched in a single transaction if the yjs type is within a document.
+ */
 export function patchYType(yTypeToMutate: Y.Map<unknown>, newState: PlainObject): void
 export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: PlainArray): void
 export function patchYType(yTypeToMutate: any, newState: any): void {
