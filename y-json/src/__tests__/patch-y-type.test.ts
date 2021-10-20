@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { isYMap } from '../assertions'
+import { isYArray, isYMap } from '../assertions'
 import { patchYType } from '../patch-y-type'
 
 const makeDoc = (): Y.Doc => new Y.Doc()
@@ -28,15 +28,6 @@ describe('patchYType tests', () => {
     patchYType(yMap, newData)
 
     expect(yMap.toJSON()).toEqual(newData)
-  })
-
-  it('uses yMaps to represent nested maps', () => {
-    const yMap = makeYMap()
-    const data = { a: { a: true } }
-
-    patchYType(yMap, data)
-
-    if (!isYMap(yMap.get('a'))) fail(`Expected yMap.a to be a yMap. Got: ${JSON.stringify(yMap.get('a'))}`)
   })
 
   it('can patch one array', () => {
@@ -69,5 +60,25 @@ describe('patchYType tests', () => {
     patchYType(yMap, newObject)
 
     expect(yMap.toJSON()).toEqual(newObject)
+  })
+
+  it('uses `Y.Map`s to represent nested maps', () => {
+    const yMap = makeYMap()
+    const data = { a: { a: true } }
+
+    patchYType(yMap, data)
+
+    if (!isYMap(yMap.get('a'))) fail(`Expected yMap.a to be a yMap. Got: ${JSON.stringify(yMap.get('a'))}`)
+  })
+
+  it('uses `Y.Array`s to represent nested arrays', () => {
+    const object = { arr: [1, 2, 4] }
+
+    const yMap = makeYMap()
+
+    patchYType(yMap, object)
+
+    const arr = yMap.get('arr')
+    if (!isYArray(arr)) fail(`Expected \`arr\` to be a \`Y.Array\`, got ${JSON.stringify(arr)}`)
   })
 })
