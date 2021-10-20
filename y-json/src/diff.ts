@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import _, { isArray } from 'lodash'
 import {
-  assertIsValidValue,
-  isValidArray,
-  isValidObject,
-  ValidArray,
-  ValidObject,
-  ValidValue,
-} from './valid-value'
+  assertIsJson,
+  isPlainArray,
+  isPlainObject,
+  Json,
+  PlainArray,
+  PlainObject,
+} from '../../json/src/validate'
 
 type Delete = { type: 'delete'; key: string }
 type Nest = { type: 'nest'; key: string; diffs: Diff[] }
-type Upsert = { type: 'upsert'; key: string; value: ValidValue }
-type ArrayUpsert = { type: 'array-upsert'; index: number; value: ValidValue }
+type Upsert = { type: 'upsert'; key: string; value: Json }
+type ArrayUpsert = { type: 'array-upsert'; index: number; value: Json }
 type ArrayDelete = { type: 'array-delete'; index: number }
 type ArrayNest = { type: 'array-nest'; key: string; diffs: (ArrayUpsert | ArrayDelete)[] }
 export type Diff = Delete | Upsert | Nest | ArrayUpsert | ArrayDelete | ArrayNest
@@ -25,7 +25,7 @@ function keySet(a: Readonly<Record<string, unknown>>): Readonly<Set<string>> {
   return new Set(Object.keys(a))
 }
 
-function diffArray(a: unknown, b: Readonly<ValidArray>): (ArrayDelete | ArrayUpsert)[] {
+function diffArray(a: unknown, b: Readonly<PlainArray>): (ArrayDelete | ArrayUpsert)[] {
   const oldArray = Array.isArray(a) ? a : ([] as const)
 
   let offset = 0
@@ -54,7 +54,7 @@ function diffArray(a: unknown, b: Readonly<ValidArray>): (ArrayDelete | ArrayUps
   return [...deletions, ...upserts]
 }
 
-function diffObject(a: unknown, b: Readonly<ValidObject>): (Delete | Nest | Upsert | ArrayNest)[] {
+function diffObject(a: unknown, b: Readonly<PlainObject>): (Delete | Nest | Upsert | ArrayNest)[] {
   const aKeys = isObject(a) ? keySet(a) : new Set<string>()
   const bKeys = keySet(b)
 
@@ -64,7 +64,7 @@ function diffObject(a: unknown, b: Readonly<ValidObject>): (Delete | Nest | Upse
     .filter(([key, value]) => !_.isEqual(_.get(a, key), value))
     // Map the changes into upserts of nestings
     .map(([key, value]) => {
-      assertIsValidValue(value)
+      assertIsJson(value)
       if (isArray(value)) return { type: 'array-nest', key, diffs: diffArray(_.get(a, key), value) }
       if (isObject(value)) return { type: 'nest', key, diffs: diff(_.get(a, key), value) }
       return { type: 'upsert', key, value }
@@ -76,9 +76,9 @@ function diffObject(a: unknown, b: Readonly<ValidObject>): (Delete | Nest | Upse
 /**
  * Compute the operations required to turn `a` into `b`
  */
-export function diff(a: unknown, b: Readonly<ValidObject | ValidArray>): Diff[] {
-  if (isValidArray(b)) return diffArray(a, b)
-  if (isValidObject(b)) return diffObject(a, b)
+export function diff(a: unknown, b: Readonly<Json>): Diff[] {
+  if (isPlainArray(b)) return diffArray(a, b)
+  if (isPlainObject(b)) return diffObject(a, b)
 
   throw new Error(`Expected an object or an array, got ${JSON.stringify(b)}`)
 }

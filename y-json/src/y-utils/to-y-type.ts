@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as Y from 'yjs'
-import { assertIsJsonPrimitive, assertIsPlainObject } from '../../../json/src'
-import { isPlainObject } from '../assertions'
-import { isValidArray, isValidObject, ValidValue } from '../valid-value'
+import {
+  assertIsJsonPrimitive,
+  assertIsPlainObject,
+  isJsonPrimitive,
+  isPlainArray,
+  isPlainObject,
+  Json,
+} from '../../../json/src/validate'
 
 function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
   const yMap = new Y.Map()
@@ -39,15 +44,10 @@ function arrayToYArray(array: unknown[]): Y.Array<unknown> {
   return yArray
 }
 
-export function toYType(
-  value: ValidValue,
-): Y.Map<unknown> | Y.Array<unknown> | string | number | boolean | null {
-  if (value === null) return null
-  if (typeof value === 'string') return value
-  if (typeof value === 'number') return value
-  if (typeof value === 'boolean') return value
-  if (isValidArray(value)) arrayToYArray(value)
-  if (isValidObject(value)) throw new Error('TODO')
+export function toYType(value: Json): Y.Map<unknown> | Y.Array<unknown> | string | number | boolean | null {
+  if (isJsonPrimitive(value)) return value
+  if (isPlainArray(value)) arrayToYArray(value)
+  if (isPlainObject(value)) throw new Error('TODO')
 
   throw new Error(`Unsupported type. Type: ${typeof value}, value ${JSON.stringify(value)}`)
 }

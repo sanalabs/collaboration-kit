@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import * as Y from 'yjs'
 import { mkErr } from '../../json/src'
 
@@ -26,8 +25,4 @@ export function assertIsYMapOrArray(
 ): asserts val is Y.Map<unknown> | Y.Array<unknown> {
   if (isYMap(val) || isYArray(val)) return
   throw mkErr(val, `Y.Map or Y.Array at property ${property}`)
-}
-
-export function isPlainObject(val: unknown): val is Record<string, unknown> {
-  return _.isPlainObject(val)
 }

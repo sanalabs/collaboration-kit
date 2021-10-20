@@ -1,7 +1,7 @@
 import * as Y from 'yjs'
+import { isPlainArray, isPlainObject, PlainArray, PlainObject } from '../../json/src/validate'
 import { assertIsYArray, assertIsYMap, assertIsYMapOrArray, isYArray, isYMap } from './assertions'
 import { diff, Diff } from './diff'
-import { isValidArray, isValidObject, ValidArray, ValidObject } from './valid-value'
 import { getOrCreateNestedYArray, getOrCreateNestedYMap, toYType, transact } from './y-utils'
 
 function applyDiff(yType: Y.Map<unknown> | Y.Array<unknown>, diff: Diff): void {
@@ -55,14 +55,14 @@ function applyDiff(yType: Y.Map<unknown> | Y.Array<unknown>, diff: Diff): void {
   }
 }
 
-export function patchYType(yTypeToMutate: Y.Map<unknown>, newState: ValidObject): void
-export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: ValidArray): void
+export function patchYType(yTypeToMutate: Y.Map<unknown>, newState: PlainObject): void
+export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: PlainArray): void
 export function patchYType(yTypeToMutate: any, newState: any): void {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
 
   transact(yTypeToMutate, () => {
-    const isYArrayAndArray = isYArray(yTypeToMutate) && isValidArray(newState)
-    const isYMapAndObject = isYMap(yTypeToMutate) && isValidObject(newState)
+    const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
+    const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
 
     if (isYArrayAndArray || isYMapAndObject) {
       const oldState: unknown = yTypeToMutate.toJSON()
