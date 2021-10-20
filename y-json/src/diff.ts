@@ -17,11 +17,15 @@ type ArrayDelete = { type: 'array-delete'; index: number }
 type ArrayNest = { type: 'array-nest'; key: string; diffs: (ArrayUpsert | ArrayDelete)[] }
 export type Diff = Delete | Upsert | Nest | ArrayUpsert | ArrayDelete | ArrayNest
 
-const isObject = (val: unknown): val is Record<string, unknown> => val instanceof Object
+function isObject(val: unknown): val is Record<string, unknown> {
+  return val instanceof Object
+}
 
-const keySet = (a: Readonly<Record<string, unknown>>): Readonly<Set<string>> => new Set(Object.keys(a))
+function keySet(a: Readonly<Record<string, unknown>>): Readonly<Set<string>> {
+  return new Set(Object.keys(a))
+}
 
-const diffArray = (a: unknown, b: Readonly<ValidArray>): (ArrayDelete | ArrayUpsert)[] => {
+function diffArray(a: unknown, b: Readonly<ValidArray>): (ArrayDelete | ArrayUpsert)[] {
   const oldArray = Array.isArray(a) ? a : ([] as const)
 
   let offset = 0
@@ -50,7 +54,7 @@ const diffArray = (a: unknown, b: Readonly<ValidArray>): (ArrayDelete | ArrayUps
   return [...deletions, ...upserts]
 }
 
-const diffObject = (a: unknown, b: Readonly<ValidObject>): (Delete | Nest | Upsert | ArrayNest)[] => {
+function diffObject(a: unknown, b: Readonly<ValidObject>): (Delete | Nest | Upsert | ArrayNest)[] {
   const aKeys = isObject(a) ? keySet(a) : new Set<string>()
   const bKeys = keySet(b)
 
