@@ -4,7 +4,7 @@ import { assertIsJsonPrimitive, assertIsPlainObject } from '../../../json/src'
 import { isPlainObject } from '../assertions'
 import { isValidArray, isValidObject, ValidValue } from '../valid-value'
 
-const objectToYMap = (object: Record<string, unknown>): Y.Map<unknown> => {
+function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
   const yMap = new Y.Map()
 
   assertIsPlainObject(object)
@@ -22,7 +22,7 @@ const objectToYMap = (object: Record<string, unknown>): Y.Map<unknown> => {
   return yMap
 }
 
-const arrayToYArray = (array: unknown[]): Y.Array<unknown> => {
+function arrayToYArray(array: unknown[]): Y.Array<unknown> {
   const yArray = new Y.Array()
 
   array.forEach(val => {

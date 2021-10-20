@@ -9,11 +9,15 @@ export type ValidArray = ValidValue[]
  */
 export type ValidValue = ValidObject | ValidPrimitiveTypes | ValidArray
 
-export const isValidArray = (val: unknown): val is ValidArray => Array.isArray(val)
+export function isValidArray(val: unknown): val is ValidArray {
+  return Array.isArray(val)
+}
 
-export const isValidObject = (val: unknown): val is ValidObject => val instanceof Object
+export function isValidObject(val: unknown): val is ValidObject {
+  return val instanceof Object
+}
 
-export const isValidValue = (val: unknown): val is ValidValue => {
+export function isValidValue(val: unknown): val is ValidValue {
   return (
     typeof val === 'string' ||
     typeof val === 'number' ||
@@ -24,7 +28,7 @@ export const isValidValue = (val: unknown): val is ValidValue => {
   )
 }
 
-export const assertIsValidValue = (val: unknown): val is ValidValue => {
+export function assertIsValidValue(val: unknown): val is ValidValue {
   const isValid = isValidValue(val)
   if (!isValid) throw new Error(`Expected val to be a valid value, but got ${JSON.stringify(val)}`)
   return isValid

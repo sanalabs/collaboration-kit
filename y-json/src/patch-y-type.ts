@@ -1,10 +1,10 @@
 import * as Y from 'yjs'
 import { assertIsYArray, assertIsYMap, assertIsYMapOrArray, isYArray, isYMap } from './assertions'
-import { Diff, diff } from './diff'
+import { diff, Diff } from './diff'
 import { isValidArray, isValidObject, ValidArray, ValidObject } from './valid-value'
 import { getOrCreateNestedYArray, getOrCreateNestedYMap, toYType, transact } from './y-utils'
 
-const applyDiff = (yType: Y.Map<unknown> | Y.Array<unknown>, diff: Diff): void => {
+function applyDiff(yType: Y.Map<unknown> | Y.Array<unknown>, diff: Diff): void {
   switch (diff.type) {
     case 'delete': {
       assertIsYMap(yType)

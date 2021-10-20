@@ -72,7 +72,7 @@ const diffObject = (a: unknown, b: Readonly<ValidObject>): (Delete | Nest | Upse
 /**
  * Compute the operations required to turn `a` into `b`
  */
-export const diff = (a: unknown, b: Readonly<ValidObject | ValidArray>): Diff[] => {
+export function diff(a: unknown, b: Readonly<ValidObject | ValidArray>): Diff[] {
   if (isValidArray(b)) return diffArray(a, b)
   if (isValidObject(b)) return diffObject(a, b)
 
