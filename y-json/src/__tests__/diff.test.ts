@@ -1,4 +1,4 @@
-import { Diff, diff } from '../diff'
+import { diff, Diff } from '../diff'
 
 describe('test diff', () => {
   it('detects deleted keys', () => {
