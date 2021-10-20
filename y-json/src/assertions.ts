@@ -12,7 +12,7 @@ export function isYMap(val: unknown): val is Y.Map<unknown> {
 
 export function assertIsYMap(val: unknown): asserts val is Y.Map<unknown> {
   if (val instanceof Y.Map) return
-  throw mkErr(val, `Expected Y.Array, got: ${JSON.stringify(val)}`)
+  throw mkErr(val, 'Y.Array')
 }
 
 export function assertIsYArray(val: unknown): asserts val is Y.Array<unknown> {
