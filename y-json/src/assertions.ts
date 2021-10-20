@@ -17,7 +17,7 @@ export function assertIsYMap(val: unknown): asserts val is Y.Map<unknown> {
 
 export function assertIsYArray(val: unknown): asserts val is Y.Array<unknown> {
   if (val instanceof Y.Array) return
-  throw mkErr(val, `Expected Y.Map, got: ${JSON.stringify(val)}`)
+  throw mkErr(val, 'Y.Map')
 }
 
 export function assertIsYMapOrArray(
