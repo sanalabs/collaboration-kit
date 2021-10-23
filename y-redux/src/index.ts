@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
+import { PlainObject } from '../../json/src'
 import { patchYType } from '../../y-json/src'
 
 export type BaseAwarenessState = {
@@ -9,7 +10,7 @@ export type BaseAwarenessState = {
   isCurrentClient: boolean
 }
 
-export const SyncYMap = <T extends Record<string, unknown>>({
+export const SyncYMap = <T extends PlainObject>({
   yMap,
   setData,
   selectData,
@@ -41,7 +42,7 @@ export const SyncYMap = <T extends Record<string, unknown>>({
   return null
 }
 
-export const SyncYAwareness = <T extends Record<string, unknown>>({
+export const SyncYAwareness = <T extends PlainObject>({
   awareness,
   setAwarenessStates,
   selectLocalAwarenessState,
