@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
-import { isYArray, isYMap } from '../assertions'
-import { patchYType } from '../patch-y-type'
+import { isYArray, isYMap } from '../src/assertions'
+import { patchYType } from '../src/patch-y-type'
 
 const makeDoc = (): Y.Doc => new Y.Doc()
 

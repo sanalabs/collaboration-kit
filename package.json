@@ -2,7 +2,11 @@
   "scripts": {
     "check:lint": "eslint .",
     "check:format": "prettier --check .",
-    "check:ts": "tsc --project tsconfig.json --noEmit"
+    "check:ts": "tsc --project tsconfig.json --noEmit",
+    "check": "npm run check:lint && npm run check:format && npm run check:ts",
+    "test": "jest",
+    "test:json": "jest --roots=json",
+    "test:y-json": "jest --roots=y-json"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",

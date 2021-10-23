@@ -22,6 +22,16 @@ export function assertIsJsonPrimitive(val: unknown): asserts val is JsonPrimitiv
   if (!isJsonPrimitive(val)) throw mkErr(val, 'JSON primitive (string | number | boolean | null)')
 }
 
+export function isJsonTemplatePrimitive(val: unknown): val is JsonPrimitive {
+  if (isJsonPrimitive(val)) return true
+  if (val === undefined) return true
+  return false
+}
+
+export function assertIsJsonTemplatePrimitive(val: unknown): asserts val is JsonPrimitive {
+  if (!isJsonTemplatePrimitive(val)) throw mkErr(val, 'JSON primitive (string | number | boolean | null)')
+}
+
 export function isPlainArray(val: unknown): val is PlainArray {
   return Array.isArray(val)
 }
@@ -62,6 +72,16 @@ export function assertIsJson(val: unknown): asserts val is Json {
     val.forEach(assertIsJson)
   } else {
     assertIsJsonPrimitive(val)
+  }
+}
+
+export function assertIsJsonTemplate(val: unknown): asserts val is Json {
+  if (isPlainObject(val)) {
+    Object.values(val).forEach(assertIsJsonTemplate)
+  } else if (isPlainArray(val)) {
+    val.forEach(assertIsJsonTemplate)
+  } else {
+    assertIsJsonTemplatePrimitive(val)
   }
 }
 

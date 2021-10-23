@@ -4,11 +4,10 @@
  */
 
 module.exports = {
-  roots: ['<rootDir>'],
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.ts?$',
+  testRegex: '.*\\.test\\.ts$',
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   clearMocks: true,
 }
