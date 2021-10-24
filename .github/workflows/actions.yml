@@ -14,6 +14,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
-      - run: npm run install:all
-      - run: npm run check:all
-      - run: npm run test:all
+      - run: npm run setup
+      - run: npm run check
+      - run: npm run test

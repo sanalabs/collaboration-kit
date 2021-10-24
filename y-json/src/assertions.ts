@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { mkErr } from '../../json/src'
+import { mkErr } from '../../json/src/error'
 
 export function isYArray(val: unknown): val is Y.Array<unknown> {
   return val instanceof Y.Array

@@ -1,18 +1,18 @@
 {
   "scripts": {
-    "check:lint": "eslint .",
+    "check": "npm run check:format && npm run check:lint && npm run check:ts",
     "check:format": "prettier --check .",
+    "check:lint": "eslint .",
     "check:ts": "tsc --project tsconfig.json --noEmit",
-    "check:all": "npm run check:lint && npm run check:format && npm run check:ts",
+    "test": "jest",
     "test:json": "jest --roots=json",
     "test:y-json": "jest --roots=y-json",
-    "test:all": "jest",
-    "install:root": "npm install",
-    "install:json": "npm install --prefix json",
-    "install:y-json": "npm install --prefix y-json",
-    "install:y-react": "npm install --prefix y-react",
-    "install:y-redux": "npm install --prefix y-redux",
-    "install:all": "npm run install:root && npm run install:json && npm run install:y-json && npm run install:y-react && npm run install:y-redux"
+    "setup": "npm run setup:root && npm run setup:json && npm run setup:y-json && npm run setup:y-react && npm run setup:y-redux",
+    "setup:root": "npm install",
+    "setup:json": "npm install --prefix json",
+    "setup:y-json": "npm install --prefix y-json",
+    "setup:y-react": "npm install --prefix y-react",
+    "setup:y-redux": "npm install --prefix y-redux"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
