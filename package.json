@@ -4,11 +4,9 @@
     "check:format": "prettier --check .",
     "check:ts": "tsc --project tsconfig.json --noEmit",
     "check:all": "npm run check:lint && npm run check:format && npm run check:ts",
-
     "test:json": "jest --roots=json",
     "test:y-json": "jest --roots=y-json",
     "test:all": "jest",
-
     "install:root": "npm install",
     "install:json": "npm install --prefix json",
     "install:y-json": "npm install --prefix y-json",
