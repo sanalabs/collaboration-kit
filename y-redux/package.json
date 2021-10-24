@@ -2,8 +2,17 @@
   "name": "@sanalabs/y-redux",
   "version": "0.1.0",
   "description": "Redux state synced with Yjs",
-  "scripts": {},
   "license": "ISC",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
+    "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
+    "build": "npm run build:cjs && npm run build:esm"
+  },
   "devDependencies": {
     "@types/react": "^17.0.30",
     "react": "^17.0.2",
