@@ -1,10 +1,10 @@
 {
   "name": "@sanalabs/y-json",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "Transform Yjs Shared Types according to a JSON object",
   "license": "ISC",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/cjs/y-json/src/index.js",
+  "module": "dist/esm/y-json/src/index.js",
   "files": [
     "dist/**/*"
   ],
@@ -13,9 +13,14 @@
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm"
   },
+  "devDependencies": {
+    "yjs": "^13.5.16"
+  },
   "dependencies": {
     "@types/lodash": "^4.14.175",
-    "lodash": "^4.17.21",
-    "yjs": "^13.5.16"
+    "lodash": "^4.17.21"
+  },
+  "peerDependencies": {
+    "yjs": "^13"
   }
 }

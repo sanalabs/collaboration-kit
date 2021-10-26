@@ -46,8 +46,8 @@ function arrayToYArray(array: unknown[]): Y.Array<unknown> {
 
 export function toYType(value: Json): Y.Map<unknown> | Y.Array<unknown> | string | number | boolean | null {
   if (isJsonPrimitive(value)) return value
-  if (isPlainArray(value)) arrayToYArray(value)
-  if (isPlainObject(value)) throw new Error('TODO')
+  if (isPlainArray(value)) return arrayToYArray(value)
+  if (isPlainObject(value)) return objectToYMap(value)
 
   throw new Error(`Unsupported type. Type: ${typeof value}, value ${JSON.stringify(value)}`)
 }
