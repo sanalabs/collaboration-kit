@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import * as Y from 'yjs'
 import {
   assertIsJsonPrimitive,
@@ -7,7 +6,7 @@ import {
   isPlainArray,
   isPlainObject,
   Json,
-} from '../../../json/src/validate'
+} from '../../../json/src'
 
 function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
   const yMap = new Y.Map()
@@ -15,6 +14,7 @@ function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
   assertIsPlainObject(object)
   Object.entries(object).forEach(([property, val]) => {
     if (Array.isArray(val)) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       yMap.set(property, arrayToYArray(val))
     } else if (isPlainObject(val)) {
       yMap.set(property, objectToYMap(val))

@@ -1,2 +1,3 @@
 export * from './mutate'
-export * from './validate'
+export * from './validate-json'
+export * from './validate-plain'

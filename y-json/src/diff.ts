@@ -5,9 +5,10 @@ import {
   isPlainArray,
   isPlainObject,
   Json,
-  PlainArray,
-  PlainObject,
-} from '../../json/src/validate'
+  JsonArray,
+  JsonContainer,
+  JsonObject,
+} from '../../json/src'
 
 type Delete = { type: 'delete'; key: string }
 type Nest = { type: 'nest'; key: string; diffs: Diff[] }
@@ -25,7 +26,7 @@ function keySet(a: Readonly<Record<string, unknown>>): Readonly<Set<string>> {
   return new Set(Object.keys(a))
 }
 
-function diffArray(a: unknown, b: Readonly<PlainArray>): (ArrayDelete | ArrayUpsert)[] {
+function diffArray(a: unknown, b: Readonly<JsonArray>): (ArrayDelete | ArrayUpsert)[] {
   const oldArray = Array.isArray(a) ? a : ([] as const)
 
   let offset = 0
@@ -54,7 +55,7 @@ function diffArray(a: unknown, b: Readonly<PlainArray>): (ArrayDelete | ArrayUps
   return [...deletions, ...upserts]
 }
 
-function diffObject(a: unknown, b: Readonly<PlainObject>): (Delete | Nest | Upsert | ArrayNest)[] {
+function diffObject(a: unknown, b: Readonly<JsonObject>): (Delete | Nest | Upsert | ArrayNest)[] {
   const aKeys = isObject(a) ? keySet(a) : new Set<string>()
   const bKeys = keySet(b)
 
@@ -66,19 +67,28 @@ function diffObject(a: unknown, b: Readonly<PlainObject>): (Delete | Nest | Upse
     .map(([key, value]) => {
       assertIsJson(value)
       if (isArray(value)) return { type: 'array-nest', key, diffs: diffArray(_.get(a, key), value) }
-      if (isObject(value)) return { type: 'nest', key, diffs: diff(_.get(a, key), value) }
+      if (isObject(value)) return { type: 'nest', key, diffs: innerDiff(_.get(a, key), value) }
       return { type: 'upsert', key, value }
     })
 
   return [...deletions, ...nestsAndUpserts]
 }
 
+function innerDiff(a: unknown, b: Readonly<JsonContainer>): Diff[] {
+  if (isPlainArray(b)) return diffArray(a, b as Readonly<JsonArray>)
+  if (isPlainObject(b)) return diffObject(a, b as Readonly<JsonObject>)
+
+  throw new Error(`Expected an object or an array, got ${JSON.stringify(b)}`)
+}
+
 /**
  * Compute the operations required to turn `a` into `b`
  */
-export function diff(a: unknown, b: Readonly<Json>): Diff[] {
-  if (isPlainArray(b)) return diffArray(a, b)
-  if (isPlainObject(b)) return diffObject(a, b)
-
-  throw new Error(`Expected an object or an array, got ${JSON.stringify(b)}`)
+export function diff(a: unknown, b: Readonly<JsonObject>): Diff[]
+export function diff(a: unknown, b: Readonly<JsonArray>): Diff[]
+export function diff(a: unknown, b: Readonly<JsonContainer>): Diff[] {
+  // Don't recurse this method, since it does a deep json assertion:
+  assertIsJson(a)
+  assertIsJson(b)
+  return innerDiff(a, b)
 }

@@ -1,14 +1,16 @@
 import { applyPatch, compare } from 'fast-json-patch'
-import { assertIsJson, assertIsJsonTemplate } from './validate'
-
-export function deepPatchJson<T extends Record<string, unknown> | Array<unknown>>(
-  objectToMutate: T,
-  newState: T,
-): void {
-  assertIsJson(objectToMutate)
-  assertIsJsonTemplate(newState)
-  applyPatch(objectToMutate, compare(objectToMutate, newState))
-}
+import {
+  assertIsJson,
+  isJsonPrimitive,
+  isPlainArray,
+  isPlainObject,
+  Json,
+  JsonArray,
+  JsonContainer,
+  JsonObject,
+  JsonPrimitive,
+} from './'
+import { mkErr } from './error'
 
 function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
   if (val === undefined) throw new Error()
@@ -30,14 +32,54 @@ const keyExists = (obj: any, path: string): boolean => {
   return true
 }
 
-export function deepMergeJson<T1 extends Record<string, unknown>, T2 extends Array<unknown>>(
-  objectToMutate: T1 | T2,
-  newState: Partial<T1> | T2,
-): void {
+type JsonTemplatePrimitive = JsonPrimitive | undefined
+type JsonTemplateObject = { [key: string]: JsonTemplate }
+type JsonTemplateArray = JsonTemplate[]
+type JsonTemplateContainer = JsonTemplateObject | JsonTemplateArray
+type JsonTemplate = JsonTemplatePrimitive | JsonTemplateContainer
+
+function isJsonTemplatePrimitive(val: unknown): val is JsonTemplatePrimitive {
+  if (isJsonPrimitive(val)) return true
+  if (val === undefined) return true
+  return false
+}
+
+function assertIsJsonTemplatePrimitive(val: unknown): asserts val is JsonTemplatePrimitive {
+  if (!isJsonTemplatePrimitive(val))
+    throw mkErr(val, 'JSON template primitive (string | number | boolean | null | undefined)')
+}
+
+function assertIsJsonTemplate(val: unknown): asserts val is Json {
+  if (isPlainObject(val)) {
+    Object.values(val).forEach(assertIsJsonTemplate)
+  } else if (isPlainArray(val)) {
+    val.forEach(assertIsJsonTemplate)
+  } else {
+    assertIsJsonTemplatePrimitive(val)
+  }
+}
+
+// After application, objectToMutate will contain everything in newState.
+// Keys in objectToMutate are untouched if not present in newState.
+// Reference equality in objectToMutate is preserved whenever possible.
+// `undefined` values in newState objects denote deletions for objectToMutate
+export function deepMergeJson<T extends JsonObject>(objectToMutate: T, newState: JsonTemplateObject): void
+export function deepMergeJson<T extends JsonArray>(objectToMutate: T, newState: T): void
+export function deepMergeJson<T extends JsonContainer>(objectToMutate: T, newState: T): void {
   assertIsJson(objectToMutate)
   assertIsJsonTemplate(newState)
   const diffs = compare(objectToMutate, newState).filter(
     diff => diff.op !== 'remove' || keyExists(newState, diff.path) === true,
   )
   applyPatch(objectToMutate, diffs)
+}
+
+// After application, objectToMutate will be deep-value-equal to newState.
+// Reference equality in objectToMutate is preserved whenever possible.
+export function deepPatchJson<T extends JsonObject>(objectToMutate: T, newState: T): void
+export function deepPatchJson<T extends JsonArray>(objectToMutate: T, newState: T): void
+export function deepPatchJson<T extends JsonContainer>(objectToMutate: T, newState: T): void {
+  assertIsJson(objectToMutate)
+  assertIsJsonTemplate(newState)
+  applyPatch(objectToMutate, compare(objectToMutate, newState))
 }

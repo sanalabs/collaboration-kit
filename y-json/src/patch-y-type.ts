@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { isPlainArray, isPlainObject, PlainArray, PlainObject } from '../../json/src/validate'
+import { isPlainArray, isPlainObject, JsonArray, JsonObject } from '../../json/src'
 import { assertIsYArray, assertIsYMap, assertIsYMapOrArray, isYArray, isYMap } from './assertions'
 import { diff, Diff } from './diff'
 import { getOrCreateNestedYArray, getOrCreateNestedYMap, toYType, transact } from './y-utils'
@@ -59,8 +59,8 @@ function applyDiff(yType: Y.Map<unknown> | Y.Array<unknown>, diff: Diff): void {
  * Mutate a Y.Map or Y.Array into the given `newState`.
  * The mutations will be batched in a single transaction if the yjs type is within a document.
  */
-export function patchYType(yTypeToMutate: Y.Map<unknown>, newState: PlainObject): void
-export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: PlainArray): void
+export function patchYType(yTypeToMutate: Y.Map<unknown>, newState: JsonObject): void
+export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: JsonArray): void
 export function patchYType(yTypeToMutate: any, newState: any): void {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
 
@@ -70,7 +70,7 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
 
     if (isYArrayAndArray || isYMapAndObject) {
       const oldState: unknown = yTypeToMutate.toJSON()
-      const diffs = diff(oldState, newState)
+      const diffs = diff(oldState, newState as JsonObject)
       diffs.forEach(diff => applyDiff(yTypeToMutate, diff))
 
       return

@@ -30,7 +30,7 @@ describe('test merge', () => {
 
   it('undefined deletes keys', () => {
     const source = { deep: { a: 1, b: 2, c: 3 } }
-    const target: any = { deep: { a: 11, b: undefined } }
+    const target = { deep: { a: 11, b: undefined } }
     deepMergeJson(source, target)
     expect(source).toStrictEqual({ deep: { a: 11, c: 3 } })
   })

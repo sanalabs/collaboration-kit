@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
-import { PlainObject } from '../../json/src'
+import { JsonObject } from '../../json/src'
 import { patchYType } from '../../y-json/src'
 
 export type BaseAwarenessState = {
@@ -10,14 +10,14 @@ export type BaseAwarenessState = {
   isCurrentClient: boolean
 }
 
-export const SyncYMap = <T extends PlainObject>({
+export const SyncYMap = <T extends JsonObject>({
   yMap,
   setData,
   selectData,
 }: {
   yMap: Y.Map<T>
   setData: (data: T) => any
-  selectData: (...reduxState: any[]) => T | undefined
+  selectData: (state: any) => T | undefined
 }): null => {
   const dispatch = useDispatch()
   const data = useSelector(selectData)
@@ -42,15 +42,14 @@ export const SyncYMap = <T extends PlainObject>({
   return null
 }
 
-export const SyncYAwareness = <T extends PlainObject>({
+export const SyncYAwareness = <T extends JsonObject>({
   awareness,
   setAwarenessStates,
   selectLocalAwarenessState,
 }: {
   awareness: Awareness
   setAwarenessStates: (awarenessStates: (BaseAwarenessState & T)[]) => void
-  selectLocalAwarenessState: (reduxState: any) => T | undefined
-  isValid?: (val: unknown) => val is T
+  selectLocalAwarenessState: (state: any) => T | undefined
 }): null => {
   const dispatch = useDispatch()
   const localAwarenessState = useSelector(selectLocalAwarenessState)
