@@ -56,7 +56,7 @@ function diffArray(a: unknown, b: Readonly<JsonArray>): (ArrayDelete | ArrayUpse
 }
 
 /**
- * Get the value of a key in an object. Unlike _.get, this function explicitly does not operate on arrays.
+ * Get the value of a key in an object. Unlike `_.get`, this function explicitly does not operate on arrays.
  */
 function objGet(obj: unknown, key: string): unknown {
   if (isObject(obj) && !isArray(obj)) return _.get(obj, key)
