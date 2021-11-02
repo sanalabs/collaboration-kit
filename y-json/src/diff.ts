@@ -55,19 +55,28 @@ function diffArray(a: unknown, b: Readonly<JsonArray>): (ArrayDelete | ArrayUpse
   return [...deletions, ...upserts]
 }
 
+/**
+ * Get the value of a key in an object. The object must not be an array.
+ */
+function objGet(obj: unknown, key: string): unknown {
+  if (isObject(obj) && !isArray(obj)) return _.get(obj, key)
+  return undefined
+}
+
 function diffObject(a: unknown, b: Readonly<JsonObject>): (Delete | Nest | Upsert | ArrayNest)[] {
   const aKeys = isObject(a) ? keySet(a) : new Set<string>()
   const bKeys = keySet(b)
 
   const deletions: Delete[] = [...aKeys].filter(key => !bKeys.has(key)).map(key => ({ type: 'delete', key }))
+
   const nestsAndUpserts: (Upsert | Nest | ArrayNest)[] = Object.entries(b)
     // Find all the key/value pairs that have changed
-    .filter(([key, value]) => !_.isEqual(_.get(a, key), value))
+    .filter(([key, value]) => !_.isEqual(objGet(a, key), value))
     // Map the changes into upserts of nestings
     .map(([key, value]) => {
       assertIsJson(value)
-      if (isArray(value)) return { type: 'array-nest', key, diffs: diffArray(_.get(a, key), value) }
-      if (isObject(value)) return { type: 'nest', key, diffs: innerDiff(_.get(a, key), value) }
+      if (isArray(value)) return { type: 'array-nest', key, diffs: diffArray(objGet(a, key), value) }
+      if (isObject(value)) return { type: 'nest', key, diffs: innerDiff(objGet(a, key), value) }
       return { type: 'upsert', key, value }
     })
 
