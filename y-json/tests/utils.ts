@@ -1,4 +1,3 @@
-import { applyPatch, compare } from 'fast-json-patch'
 import _ from 'lodash'
 import * as Y from 'yjs'
 
@@ -38,13 +37,6 @@ export const generateObject = (): RandomObj => {
     return [`${index}`, generateValue()]
   })
   return Object.fromEntries(entries)
-}
-
-export function patch<T extends Record<string, unknown> | Array<unknown>>(
-  objectToMutate: T,
-  newState: T,
-): void {
-  applyPatch(objectToMutate, compare(objectToMutate, newState))
 }
 
 export const makeDoc = (): Y.Doc => new Y.Doc()

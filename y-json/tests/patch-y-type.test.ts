@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { deepPatchJson } from '../../json/src'
 import { assertIsYMapOrArray, isYArray, isYMap } from '../src/assertions'
 import { patchYType } from '../src/patch-y-type'
 import * as utils from './utils'
@@ -127,7 +128,7 @@ describe('patchYType tests', () => {
 
       tryPatchYType(yMap, randomObject)
 
-      utils.patch(redux, yMap.toJSON())
+      deepPatchJson(redux, yMap.toJSON())
 
       if (!_.isEqual(redux, expectedState)) {
         console.log(`MISMATCH at index ${index}`)
