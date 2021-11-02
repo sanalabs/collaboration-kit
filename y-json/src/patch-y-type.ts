@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import * as Y from 'yjs'
 import { isPlainArray, isPlainObject, JsonArray, JsonObject } from '../../json/src'
 import { assertIsYArray, assertIsYMap, assertIsYMapOrArray, isYArray, isYMap } from './assertions'
@@ -73,6 +74,14 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
       const diffs = diff(oldState, newState as JsonObject)
       diffs.forEach(diff => applyDiff(yTypeToMutate, diff))
 
+      const yState: unknown = yTypeToMutate.toJSON()
+      if (!_.isEqual(yState, newState)) {
+        throw new Error(
+          `Failed to patch yType. yType state: ${JSON.stringify(yState)}, expected state: ${JSON.stringify(
+            newState,
+          )}`,
+        )
+      }
       return
     }
 
