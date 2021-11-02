@@ -12,7 +12,7 @@ const tryPatchYType: typeof patchYType = (yType, data) => {
   } catch (e) {
     console.log('State', JSON.stringify(yTypeState, null, 2))
     console.log('Expected State', JSON.stringify(data, null, 2))
-    throw new Error(`Failed to patch with error ${e}`)
+    throw new Error(`Failed to patch with error ${JSON.stringify(e)}`)
   }
 }
 
