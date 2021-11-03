@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { patchYType } from '..'
-import { deepPatchJson } from '../../../../json/src'
-import * as assertions from '../../assertions'
+import { deepPatchJson } from '../../json/src'
+import * as assertions from '../src/assertions'
+import { patchYType } from '../src/patch-y-type'
 import * as utils from './utils'
 
 const tryPatchYType: typeof patchYType = (yType, data) => {
