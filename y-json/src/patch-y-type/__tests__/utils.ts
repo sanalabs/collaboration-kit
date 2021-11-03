@@ -30,6 +30,11 @@ export const generateObject = (): RandomObj => {
   return Object.fromEntries(entries)
 }
 
+export const generateLongString = (): string =>
+  _.range(10, _.random(20, 200))
+    .map(() => _.sample(['a', 'b', 'c', '1', '2', '3']))
+    .join()
+
 export const makeDoc = (): Y.Doc => new Y.Doc()
 
 export const makeYMap = (): Y.Map<unknown> => makeDoc().getMap('test-map')
