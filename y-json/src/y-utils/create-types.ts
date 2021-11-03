@@ -3,6 +3,7 @@ import { isYArray, isYMap } from '../assertions'
 
 export function getOrCreateNestedYMap(yMap: Y.Map<unknown>, key: string): Y.Map<unknown> {
   const mapValue = yMap.get(key)
+  console.log('inner map value', mapValue, isYMap(mapValue))
 
   if (isYMap(mapValue)) return mapValue
 

@@ -9,17 +9,8 @@ export type RandomObj = { [key: string]: RandomValue }
 // eslint-disable-next-line @typescript-eslint/no-use-before-define
 const generateArray = (): RandomArr => _.range(0, _.random(0, 10, false)).map(() => generateValue())
 
-const generatePrimitive = (): RandomPrimitive => {
-  const index = _.random(0, 2, false)
-  switch (index) {
-    case 0:
-      return 1
-    case 1:
-      return 'two'
-    default:
-      return false
-  }
-}
+const generatePrimitive = (): RandomPrimitive =>
+  _.sample([..._.range(0, 5), 'abc', 'def', 'acb', 'adc', '', false, true]) ?? 0
 
 export const generateValue = (): RandomValue => {
   const index = _.random(0, 25, false)
