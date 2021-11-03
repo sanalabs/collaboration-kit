@@ -185,17 +185,7 @@ describe('patchYType tests', () => {
     })
   })
 
-  // This is a generated test case that previously caused issues
-  it('handles complex array deletions', () => {
-    const current = { '0': [[1]] }
-    const expected = { '0': { '0': [{}] } }
-    const yMap = utils.makeYMap()
-    tryPatchYType(yMap, current)
-    tryPatchYType(yMap, expected)
-    expect(yMap.toJSON()).toEqual(expected)
-  })
-
-  it('handles generated test case', () => {
+  it('handles generated test case 1', () => {
     const startingState = { '0': 2, '1': [3, 1, 3, 'acb', 3, false, 'adc'], '2': 1, '3': ['', 'acb'] }
     const expectedState = { '0': 2, '1': [3, '', 3, 1, 3, false, 'adc'], '2': 1, '3': ['', 'acb'] }
 
@@ -241,5 +231,14 @@ describe('patchYType tests', () => {
     tryPatchYType(yArray, startingState)
     tryPatchYType(yArray, expectedState)
     expect(yArray.toJSON()).toEqual(expectedState)
+  })
+
+  it('handles generated test case 5', () => {
+    const current = { '0': [[1]] }
+    const expected = { '0': { '0': [{}] } }
+    const yMap = utils.makeYMap()
+    tryPatchYType(yMap, current)
+    tryPatchYType(yMap, expected)
+    expect(yMap.toJSON()).toEqual(expected)
   })
 })
