@@ -149,7 +149,7 @@ describe('patchYType tests', () => {
 
   it('handles deeply chained mutations of ymaps', () => {
     const yMap = utils.makeYMap()
-    _.range(0, 100000).forEach((none, index) => {
+    _.range(0, 10000).forEach((none, index) => {
       const randomObject = Object.freeze(utils.generateObject())
       const copyYmap: unknown = yMap.toJSON()
       tryPatchYType(yMap, randomObject)
