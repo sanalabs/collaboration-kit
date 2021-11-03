@@ -241,4 +241,26 @@ describe('patchYType tests', () => {
     tryPatchYType(yMap, expected)
     expect(yMap.toJSON()).toEqual(expected)
   })
+
+  it('handles long strings in maps', () => {
+    const longString1 = _.repeat('a', 100)
+    const longString2 = `${longString1}b`
+    const current = { '0': longString1 }
+    const expected = { '0': longString2 }
+    const yMap = utils.makeYMap()
+    tryPatchYType(yMap, current)
+    tryPatchYType(yMap, expected)
+    expect(yMap.toJSON()).toEqual(expected)
+  })
+
+  it('handles long strings in arrays', () => {
+    const longString1 = _.repeat('a', 100)
+    const longString2 = `${longString1}b`
+    const current = [longString1]
+    const expected = [longString2]
+    const yArray = utils.makeYArray()
+    tryPatchYType(yArray, current)
+    tryPatchYType(yArray, expected)
+    expect(yArray.toJSON()).toEqual(expected)
+  })
 })
