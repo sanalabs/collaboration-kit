@@ -18,24 +18,24 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
     const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
     const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
 
-    if (isYArrayAndArray || isYMapAndObject) {
-      const oldState: unknown = yTypeToMutate.toJSON()
-      const delta = patchDiffJsonExtensions.diff(oldState, newState)
-      if (delta !== undefined) {
-        patchDiffJsonExtensions.patch(yTypeToMutate, delta)
-      }
-
-      const yState: unknown = yTypeToMutate.toJSON()
-      if (!_.isEqual(yState, newState)) {
-        throw new Error(
-          `Failed to patch yType. yType state: ${JSON.stringify(yState)}, expected state: ${JSON.stringify(
-            newState,
-          )}, oldState: ${JSON.stringify(oldState)}`,
-        )
-      }
-      return
+    if (!isYArrayAndArray && !isYMapAndObject) {
+      throw new Error('Expected either a Y.Array and an Array, or a Y.Map and an object')
     }
 
-    throw new Error('Expected either a Y.Array and an Array, or a Y.Map and an object')
+    const oldState: unknown = yTypeToMutate.toJSON()
+    const delta = patchDiffJsonExtensions.diff(oldState, newState)
+    if (delta !== undefined) {
+      patchDiffJsonExtensions.patch(yTypeToMutate, delta)
+    }
+
+    const yState: unknown = yTypeToMutate.toJSON()
+    if (!_.isEqual(yState, newState)) {
+      throw new Error(
+        `Failed to patch yType. yType state: ${JSON.stringify(yState)}, expected state: ${JSON.stringify(
+          newState,
+        )}, oldState: ${JSON.stringify(oldState)}`,
+      )
+    }
+    return
   })
 }
