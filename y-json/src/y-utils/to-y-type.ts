@@ -5,7 +5,6 @@ import {
   isJsonPrimitive,
   isPlainArray,
   isPlainObject,
-  Json,
 } from '../../../json/src'
 
 function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
@@ -44,7 +43,9 @@ function arrayToYArray(array: unknown[]): Y.Array<unknown> {
   return yArray
 }
 
-export function toYType(value: Json): Y.Map<unknown> | Y.Array<unknown> | string | number | boolean | null {
+export function toYType(
+  value: unknown,
+): Y.Map<unknown> | Y.Array<unknown> | string | number | boolean | null {
   if (isJsonPrimitive(value)) return value
   if (isPlainArray(value)) return arrayToYArray(value)
   if (isPlainObject(value)) return objectToYMap(value)

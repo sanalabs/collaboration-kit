@@ -4,7 +4,11 @@ export function isPlainArray(val: unknown): val is unknown[] {
   return Array.isArray(val)
 }
 
-export function assertIsArray(val: unknown): asserts val is unknown[] {
+export function assertIsString(val: unknown): asserts val is string {
+  if (typeof val !== 'string') throw mkErr(val, 'string')
+}
+
+export function assertIsPlainArray(val: unknown): asserts val is unknown[] {
   if (!isPlainArray(val)) throw mkErr(val, 'array')
 }
 
