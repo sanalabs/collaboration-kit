@@ -1,6 +1,8 @@
 import * as Y from 'yjs'
 import { mkErr } from '../../json/src/error'
 
+export type YJson = Y.Map<YJson> | Y.Array<YJson> | string | number | boolean | null
+
 export function isYArray(val: unknown): val is Y.Array<unknown> {
   return val instanceof Y.Array
 }

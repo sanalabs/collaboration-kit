@@ -1,18 +1,25 @@
 import * as Y from 'yjs'
+import { YJson } from '..'
 import {
+  assertIsJsonArray,
+  assertIsJsonObject,
   assertIsJsonPrimitive,
   assertIsPlainObject,
   isJsonPrimitive,
   isPlainArray,
   isPlainObject,
+  Json,
+  JsonArray,
+  JsonObject,
 } from '../../../json/src'
 
-function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
-  const yMap = new Y.Map()
+export function objectToYMap(object: JsonObject): Y.Map<YJson> {
+  const yMap = new Y.Map<YJson>()
 
   assertIsPlainObject(object)
   Object.entries(object).forEach(([property, val]) => {
     if (Array.isArray(val)) {
+      assertIsJsonArray(val)
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       yMap.set(property, arrayToYArray(val))
     } else if (isPlainObject(val)) {
@@ -26,8 +33,8 @@ function objectToYMap(object: Record<string, unknown>): Y.Map<unknown> {
   return yMap
 }
 
-function arrayToYArray(array: unknown[]): Y.Array<unknown> {
-  const yArray = new Y.Array()
+export function arrayToYArray(array: JsonArray): Y.Array<YJson> {
+  const yArray = new Y.Array<YJson>()
 
   array.forEach(val => {
     if (Array.isArray(val)) {
@@ -43,12 +50,25 @@ function arrayToYArray(array: unknown[]): Y.Array<unknown> {
   return yArray
 }
 
-export function toYType(
-  value: unknown,
-): Y.Map<unknown> | Y.Array<unknown> | string | number | boolean | null {
-  if (isJsonPrimitive(value)) return value
+export function toYType(value: Json): Y.Map<YJson> | Y.Array<YJson> {
   if (isPlainArray(value)) return arrayToYArray(value)
   if (isPlainObject(value)) return objectToYMap(value)
+
+  throw new Error(`Unsupported type. Type: ${typeof value}, value ${JSON.stringify(value)}`)
+}
+
+export function unknownToYTypeOrPrimitive(value: unknown): YJson {
+  if (isJsonPrimitive(value)) return value
+
+  if (isPlainArray(value)) {
+    assertIsJsonArray(value)
+    return arrayToYArray(value)
+  }
+
+  if (isPlainObject(value)) {
+    assertIsJsonObject(value)
+    return objectToYMap(value)
+  }
 
   throw new Error(`Unsupported type. Type: ${typeof value}, value ${JSON.stringify(value)}`)
 }

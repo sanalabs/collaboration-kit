@@ -3,7 +3,7 @@ import _ from 'lodash'
 import * as Y from 'yjs'
 import { isPlainArray, isPlainObject } from '../../../json/src'
 import { assertIsYArray, assertIsYMap, assertIsYMapOrArray } from '../assertions'
-import { toYType } from '../y-utils'
+import { unknownToYTypeOrPrimitive } from '../y-utils'
 
 // Handling moves in yjs types is too difficult at the moment.
 // We may revisit this in the future.
@@ -41,7 +41,7 @@ type NestedUpdate = Delta
 const isNestedDelta = (operation: unknown): operation is NestedUpdate =>
   isPlainObject(operation) && !isPlainArray(operation)
 
-type YType = ReturnType<typeof toYType>
+type YType = ReturnType<typeof unknownToYTypeOrPrimitive>
 
 const arrayOperations = (
   delta: ArrayDelta,
@@ -60,7 +60,7 @@ const arrayOperations = (
 
   return {
     insertions: entries.flatMap(([key, operation]) =>
-      isInsertion(operation) ? [[key, toYType(operation[0])]] : [],
+      isInsertion(operation) ? [[key, unknownToYTypeOrPrimitive(operation[0])]] : [],
     ),
     deletions: entries
       .flatMap(([key, operation]) => (isDeletion(operation) ? [key] : []))
@@ -69,7 +69,7 @@ const arrayOperations = (
       // affecting the indices of deletes at larger index values.
       .reverse(),
     updates: entries.flatMap(([key, operation]) =>
-      isUpdate(operation) ? [[key, toYType(operation[1])]] : [],
+      isUpdate(operation) ? [[key, unknownToYTypeOrPrimitive(operation[1])]] : [],
     ),
     nestedUpdates: entries.flatMap(([key, nestedDelta]) =>
       isNestedDelta(nestedDelta) ? [[key, nestedDelta]] : [],
@@ -92,11 +92,11 @@ const objectOperations = (
 
   return {
     insertions: entries.flatMap(([key, operation]) =>
-      isInsertion(operation) ? [[key, toYType(operation[0])]] : [],
+      isInsertion(operation) ? [[key, unknownToYTypeOrPrimitive(operation[0])]] : [],
     ),
     deletions: entries.flatMap(([key, operation]) => (isDeletion(operation) ? [key] : [])),
     updates: entries.flatMap(([key, operation]) =>
-      isUpdate(operation) ? [[key, toYType(operation[1])]] : [],
+      isUpdate(operation) ? [[key, unknownToYTypeOrPrimitive(operation[1])]] : [],
     ),
     nestedUpdates: entries.flatMap(([key, nestedDelta]) =>
       isNestedDelta(nestedDelta) ? [[key, nestedDelta]] : [],
