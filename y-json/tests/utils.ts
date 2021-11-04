@@ -1,39 +1,37 @@
-import _ from 'lodash'
+import * as fc from 'fast-check'
+import { Arbitrary } from 'fast-check'
+import { isArray, isObject } from 'lodash'
 import * as Y from 'yjs'
+import { assertIsJsonArray, assertIsJsonObject, JsonArray, JsonObject } from '../../json/src'
 
 export type RandomArr = RandomValue[]
 export type RandomPrimitive = string | number | boolean
 export type RandomValue = RandomPrimitive | RandomArr | RandomObj
 export type RandomObj = { [key: string]: RandomValue }
 
-// eslint-disable-next-line @typescript-eslint/no-use-before-define
-const generateArray = (): RandomArr => _.range(0, _.random(0, 10, false)).map(() => generateValue())
+// We strictly want values that can be serialized as JSON.
+// fast-check by default gives us -0, which can be deserialized but not serialized.
+// See: https://github.com/dubzzz/fast-check/blob/main/documentation/Arbitraries.md
+const encodeJson = (val: unknown): unknown => JSON.parse(JSON.stringify(val))
 
-const generatePrimitive = (): RandomPrimitive =>
-  _.sample([..._.range(0, 5), 'abc', 'def', 'acb', 'adc', '', false, true]) ?? 0
+export const arbitraryJSONObject = (): Arbitrary<JsonObject> =>
+  fc
+    .jsonObject({ maxDepth: 10 })
+    .map(encodeJson)
+    .map(obj => (isObject(obj) && !isArray(obj) ? obj : { a: obj }))
+    .map(it => {
+      assertIsJsonObject(it)
+      return it
+    })
 
-export const generateValue = (): RandomValue => {
-  const index = _.random(0, 25, false)
-  if (index < 2) {
-    return generateArray()
-  } else if (index < 5) {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    return generateObject()
-  }
-  return generatePrimitive()
-}
-
-export const generateObject = (): RandomObj => {
-  const entries: [string, RandomValue][] = _.range(0, _.random(0, 5, false)).map((it, index) => {
-    return [`${index}`, generateValue()]
-  })
-  return Object.fromEntries(entries)
-}
-
-export const generateLongString = (): string =>
-  _.range(10, _.random(20, 200))
-    .map(() => _.sample(['a', 'b', 'c', '1', '2', '3']))
-    .join()
+export const arbitraryJSONArray = (): Arbitrary<JsonArray> =>
+  fc
+    .array(fc.jsonObject())
+    .map(encodeJson)
+    .map(it => {
+      assertIsJsonArray(it)
+      return it
+    })
 
 export const makeDoc = (): Y.Doc => new Y.Doc()
 

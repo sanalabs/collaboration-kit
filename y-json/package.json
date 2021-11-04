@@ -15,6 +15,7 @@
     "test": "jest"
   },
   "devDependencies": {
+    "fast-check": "^2.19.0",
     "yjs": "^13.5.16"
   },
   "dependencies": {

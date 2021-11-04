@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import * as fc from 'fast-check'
 import { deepPatchJson } from '../../json/src'
 import * as assertions from '../src/assertions'
 import { patchYType } from '../src/patch-y-type'
@@ -147,42 +147,68 @@ describe('patchYType tests', () => {
     assertions.assertIsYArray(arr)
   })
 
-  it('handles deeply chained mutations of ymaps', () => {
-    const yMap = utils.makeYMap()
-    _.range(0, 10000).forEach((none, index) => {
-      const randomObject = Object.freeze(utils.generateObject())
-      const copyYmap: unknown = yMap.toJSON()
-      tryPatchYType(yMap, randomObject)
+  it('handles arbitrary ymap mutations', () => {
+    fc.assert(
+      fc.property(utils.arbitraryJSONObject(), utils.arbitraryJSONObject(), (firstState, secondState) => {
+        const yMap = utils.makeYMap()
+        tryPatchYType(yMap, firstState)
+        expect(yMap.toJSON()).toEqual(firstState)
+        tryPatchYType(yMap, secondState)
+        expect(yMap.toJSON()).toEqual(secondState)
+      }),
+      { numRuns: 1000 },
+    )
+  })
 
-      if (!_.isEqual(yMap.toJSON(), randomObject)) {
-        console.log(`MISMATCH at index ${index}`)
-        console.log('Previous ymap: ', copyYmap)
-        console.log('Current ymap:  ', yMap)
-        console.log('Expected ymap: ', randomObject)
-      }
+  it('handles long strings in maps', () => {
+    fc.assert(
+      fc.property(fc.string(), fc.string(), (string1, string2) => {
+        const current = { '0': string1 }
+        const expected = { '0': string2 }
+        const yMap = utils.makeYMap()
+        tryPatchYType(yMap, current)
+        tryPatchYType(yMap, expected)
+      }),
+    )
+  })
 
-      expect(yMap.toJSON()).toEqual(randomObject)
-    })
+  it('handles strings in arrays', () => {
+    fc.assert(
+      fc.property(fc.string(), fc.string(), (string1, string2) => {
+        const yArray = utils.makeYArray()
+        tryPatchYType(yArray, [string1])
+        tryPatchYType(yArray, [string2])
+        expect(yArray.toJSON()).toEqual([string2])
+      }),
+    )
+  })
+
+  it('handles arbitrary yarray mutations', () => {
+    fc.assert(
+      fc.property(utils.arbitraryJSONArray(), utils.arbitraryJSONArray(), (firstState, secondState) => {
+        const yArray = utils.makeYArray()
+        tryPatchYType(yArray, firstState)
+        expect(yArray.toJSON()).toEqual(firstState)
+        tryPatchYType(yArray, secondState)
+        expect(yArray.toJSON()).toEqual(secondState)
+      }),
+      { numRuns: 1000 },
+    )
   })
 
   it('patchYType and deepPatchJson work the same way', () => {
-    const yMap = utils.makeYMap()
-    const redux = {}
-    _.range(0, 10000).forEach((none, index) => {
-      const copyRedux = _.cloneDeep(redux)
-      const randomObject = Object.freeze(utils.generateObject())
-      const expectedState = _.cloneDeep(randomObject)
-      tryPatchYType(yMap, randomObject)
-      deepPatchJson(redux, yMap.toJSON())
-      if (!_.isEqual(redux, expectedState)) {
-        console.log(`MISMATCH at index ${index}`)
-        console.log('Previous redux:      ', copyRedux)
-        console.log('Current redux:       ', redux)
-        console.log('Expected Redux state:', expectedState)
-        console.log('Current ymap:        ', yMap.toJSON())
-      }
-      expect(redux).toEqual(expectedState)
-    })
+    fc.assert(
+      fc.property(utils.arbitraryJSONObject(), randomObject => {
+        const yMap = utils.makeYMap()
+        const redux = {}
+        tryPatchYType(yMap, randomObject)
+        deepPatchJson(redux, yMap.toJSON())
+
+        expect(redux).toEqual(randomObject)
+        expect(redux).toEqual(yMap.toJSON())
+      }),
+      { numRuns: 1000 },
+    )
   })
 
   it('handles generated test case 1', () => {
@@ -242,29 +268,12 @@ describe('patchYType tests', () => {
     expect(yMap.toJSON()).toEqual(expected)
   })
 
-  it('handles long strings in maps', () => {
-    _.range(0, 100).forEach(() => {
-      const longString1 = utils.generateLongString()
-      const longString2 = utils.generateLongString()
-      const current = { '0': longString1 }
-      const expected = { '0': longString2 }
-      const yMap = utils.makeYMap()
-      tryPatchYType(yMap, current)
-      tryPatchYType(yMap, expected)
-      expect(yMap.toJSON()).toEqual(expected)
-    })
-  })
-
-  it('handles long strings in arrays', () => {
-    _.range(0, 100).forEach(() => {
-      const longString1 = utils.generateLongString()
-      const longString2 = utils.generateLongString()
-      const current = [longString1]
-      const expected = [longString2]
-      const yArray = utils.makeYArray()
-      tryPatchYType(yArray, current)
-      tryPatchYType(yArray, expected)
-      expect(yArray.toJSON()).toEqual(expected)
-    })
+  it('handles generated test case 6', () => {
+    const current = [{ _t: {} }]
+    const expected = [{ a: 0 }]
+    const yArray = utils.makeYArray()
+    tryPatchYType(yArray, current)
+    tryPatchYType(yArray, expected)
+    expect(yArray.toJSON()).toEqual(expected)
   })
 })
