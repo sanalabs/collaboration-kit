@@ -1,4 +1,4 @@
-import { isPlainArray, isPlainObject } from '.'
+import { assertIsPlainArray, assertIsPlainObject, isPlainArray, isPlainObject } from '.'
 import { mkErr } from './error'
 
 export type JsonPrimitive = string | number | boolean | null
@@ -19,11 +19,23 @@ export function assertIsJsonPrimitive(val: unknown): asserts val is JsonPrimitiv
   if (!isJsonPrimitive(val)) throw mkErr(val, 'JSON primitive (string | number | boolean | null)')
 }
 
+export function assertIsJsonArray(val: unknown): asserts val is JsonArray {
+  assertIsPlainArray(val)
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  val.forEach(assertIsJson)
+}
+
+export function assertIsJsonObject(val: unknown): asserts val is JsonObject {
+  assertIsPlainObject(val)
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  Object.values(val).forEach(assertIsJson)
+}
+
 export function assertIsJson(val: unknown): asserts val is Json {
   if (isPlainObject(val)) {
-    Object.values(val).forEach(assertIsJson)
+    assertIsJsonObject(val)
   } else if (isPlainArray(val)) {
-    val.forEach(assertIsJson)
+    assertIsJsonArray(val)
   } else {
     assertIsJsonPrimitive(val)
   }

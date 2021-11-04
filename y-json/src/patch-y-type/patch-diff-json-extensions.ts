@@ -86,7 +86,6 @@ const objectOperations = (
   nestedUpdates: [key: string, nestedDelta: NestedUpdate][]
 } => {
   const entries = _.chain(delta)
-    .omit(['_t'])
     .entries()
     .sortBy(([key]) => key)
     .value()

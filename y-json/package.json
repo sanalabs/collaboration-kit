@@ -1,6 +1,6 @@
 {
   "name": "@sanalabs/y-json",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Transform Yjs Shared Types according to a JSON object",
   "license": "ISC",
   "main": "dist/cjs/y-json/src/index.js",
@@ -15,6 +15,7 @@
     "test": "jest"
   },
   "devDependencies": {
+    "fast-check": "^2.19.0",
     "yjs": "^13.5.16"
   },
   "dependencies": {
