@@ -54,8 +54,8 @@ const arrayOperations = (
   const entries = _.chain(delta)
     .omit(['_t'])
     .entries()
-    .sortBy(([key]) => key)
     .map(([key, operation]): [number, unknown] => [parseInt(key.replace('_', '')), operation])
+    .sortBy(([key]) => key)
     .value()
 
   return {
@@ -85,10 +85,7 @@ const objectOperations = (
   updates: [key: string, newYType: YType][]
   nestedUpdates: [key: string, nestedDelta: NestedUpdate][]
 } => {
-  const entries = _.chain(delta)
-    .entries()
-    .sortBy(([key]) => key)
-    .value()
+  const entries = _.chain(delta).entries().value()
 
   return {
     insertions: entries.flatMap(([key, operation]) =>
