@@ -24,7 +24,7 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
 
     const oldState: unknown = yTypeToMutate.toJSON()
     const delta = patchDiffJsonExtensions.diff(oldState, newState)
-    if (delta !== undefined) {
+    if (delta !== undefined && !_.isEqual(oldState, newState)) {
       patchDiffJsonExtensions.patch(yTypeToMutate, delta)
     }
 

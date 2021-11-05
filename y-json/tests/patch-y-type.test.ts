@@ -10,6 +10,11 @@ describe('patchYType tests', () => {
         const yMap = utils.makeYMap()
         patchYType(yMap, state)
         const firstJson: unknown = yMap.toJSON()
+
+        yMap.observeDeep(() => {
+          throw new Error('Nothing in the ymap should have changed')
+        })
+
         patchYType(yMap, state)
         const secondJson: unknown = yMap.toJSON()
         expect(firstJson).toEqual(secondJson)
@@ -23,6 +28,11 @@ describe('patchYType tests', () => {
         const yArray = utils.makeYArray()
         patchYType(yArray, state)
         const firstJson: unknown = yArray.toJSON()
+
+        yArray.observeDeep(() => {
+          throw new Error('Nothing in the yArray should have changed')
+        })
+
         patchYType(yArray, state)
         const secondJson: unknown = yArray.toJSON()
         expect(firstJson).toEqual(secondJson)
