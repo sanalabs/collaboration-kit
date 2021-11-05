@@ -45,7 +45,7 @@ describe('patchYType tests', () => {
 
   it('handles long strings in maps', () => {
     fc.assert(
-      fc.property(fc.string(), fc.string(), (string1, string2) => {
+      fc.property(utils.arbitraryLongString(), utils.arbitraryLongString(), (string1, string2) => {
         const current = { '0': string1 }
         const expected = { '0': string2 }
         const yMap = utils.makeYMap()
@@ -55,9 +55,9 @@ describe('patchYType tests', () => {
     )
   })
 
-  it('handles strings in arrays', () => {
+  it('handles long strings in arrays', () => {
     fc.assert(
-      fc.property(fc.string(), fc.string(), (string1, string2) => {
+      fc.property(utils.arbitraryLongString(), utils.arbitraryLongString(), (string1, string2) => {
         const yArray = utils.makeYArray()
         patchYType(yArray, [string1])
         patchYType(yArray, [string2])
