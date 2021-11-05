@@ -26,7 +26,8 @@ export const arbitraryJSONObject = (): Arbitrary<JsonObject> =>
 
 export const arbitraryJSONArray = (): Arbitrary<JsonArray> =>
   fc
-    .array(fc.jsonObject())
+    // The default maxLength is too short
+    .array(fc.jsonObject(), { maxLength: 100 })
     .map(encodeJson)
     .map(it => {
       assertIsJsonArray(it)
