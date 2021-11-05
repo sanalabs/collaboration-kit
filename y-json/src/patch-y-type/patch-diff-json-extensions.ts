@@ -85,7 +85,7 @@ const objectOperations = (
   updates: [key: string, newYType: YType][]
   nestedUpdates: [key: string, nestedDelta: NestedUpdate][]
 } => {
-  const entries = _.chain(delta).entries().value()
+  const entries = _.entries(delta)
 
   return {
     insertions: entries.flatMap(([key, operation]) =>
