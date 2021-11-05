@@ -34,6 +34,8 @@ export const arbitraryJSONArray = (): Arbitrary<JsonArray> =>
       return it
     })
 
+export const arbitraryLongString = (): Arbitrary<string> => fc.string({ maxLength: 500 })
+
 export const makeDoc = (): Y.Doc => new Y.Doc()
 
 export const makeYMap = (): Y.Map<unknown> => makeDoc().getMap('test-map')
