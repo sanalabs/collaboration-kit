@@ -3,6 +3,7 @@ import { Arbitrary } from 'fast-check'
 import { isArray, isObject } from 'lodash'
 import * as Y from 'yjs'
 import { assertIsJsonArray, assertIsJsonObject, JsonArray, JsonObject } from '../../json/src'
+import { patchYType } from '../src'
 
 export type RandomArr = RandomValue[]
 export type RandomPrimitive = string | number | boolean
@@ -36,8 +37,12 @@ export const arbitraryJSONArray = (): Arbitrary<JsonArray> =>
 
 export const arbitraryLongString = (): Arbitrary<string> => fc.string({ maxLength: 500 })
 
-export const makeDoc = (): Y.Doc => new Y.Doc()
+const makeDoc = (): Y.Doc => new Y.Doc()
 
-export const makeYMap = (): Y.Map<unknown> => makeDoc().getMap('test-map')
+export const makeYMap = <Data extends JsonObject = Record<string, string>>(data?: Data): Y.Map<Data> => {
+  const map: Y.Map<Data> = makeDoc().getMap('test-map')
+  if (data !== undefined) patchYType(map, data)
+  return map
+}
 
 export const makeYArray = (): Y.Array<unknown> => makeDoc().getArray('test-array')

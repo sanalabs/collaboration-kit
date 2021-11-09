@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 import { JsonObject } from '../../json/src'
-import { patchYType } from '../../y-json/src'
+import { SyncOptions } from '../../y-json/src'
+import { useSyncYMap } from './use-sync-ymap'
 
 export type BaseAwarenessState = {
   clientId: number
@@ -14,30 +15,20 @@ export const SyncYMap = <T extends JsonObject>({
   yMap,
   setData,
   selectData,
+  validate,
 }: {
   yMap: Y.Map<T>
   setData: (data: T) => any
   selectData: (state: any) => T | undefined
+  validate?: SyncOptions<T>['validate']
 }): null => {
   const dispatch = useDispatch()
   const data = useSelector(selectData)
 
-  useEffect(() => {
-    if (data === undefined) return
-    patchYType(yMap, data)
-  }, [yMap, data])
+  const onRemoteDataChanged = useCallback((t: T): unknown => dispatch(setData(t)), [dispatch, setData])
+  const updateRemoteData = useSyncYMap(yMap, onRemoteDataChanged, validate)
 
-  useEffect(() => {
-    const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      if (!transaction.local) {
-        dispatch(setData(yMap.toJSON() as T))
-      }
-    }
-
-    yMap.observeDeep(observer)
-
-    return () => yMap.unobserveDeep(observer)
-  }, [yMap, dispatch, setData])
+  useEffect(() => data && updateRemoteData(data), [data, updateRemoteData])
 
   return null
 }
