@@ -5,8 +5,8 @@ import { sync, SyncControls, SyncOptions } from '../../y-json/src'
 
 export const useSyncYMap = <T extends JsonObject>(
   yType: Y.Map<T>,
-  onRemoteDataChanged?: SyncOptions<T>['onRemoteDataChanged'],
-  validate?: SyncOptions<T>['validate'],
+  onRemoteDataChanged: SyncOptions<T>['onRemoteDataChanged'] = () => {},
+  validate: SyncOptions<T>['validate'] = () => {},
 ): SyncControls<T>['updateLocalData'] => {
   const [updateLocalData, setUpdateLocalData] = useState<(_: T) => void>(() => {})
 
