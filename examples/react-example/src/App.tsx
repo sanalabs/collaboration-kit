@@ -1,7 +1,7 @@
-import { patchYType } from '@sanalabs/y-json'
+import { SyncYMap } from '@sanalabs/y-redux'
 
 function App() {
-  return <>hello: {console.log(patchYType)}</>
+  return <>hello: {console.log(SyncYMap)}</>
 }
 
 export default App
