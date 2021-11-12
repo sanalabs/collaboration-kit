@@ -1,5 +1,5 @@
 import { SyncYMap } from '@sanalabs/y-redux'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { WebrtcProvider } from 'y-webrtc'
 import * as Y from 'yjs'
@@ -27,8 +27,25 @@ const DisplayMessages = () => {
   return (
     <>
       <SyncYMap yMap={yMap} setData={setData} selectData={selectData} />
-      Redux State:
-      {JSON.stringify(data)}
+      {data.messages?.map(message => (
+        <div key={message.id} style={{ display: 'flex', alignItems: 'center' }}>
+          <div
+            style={{
+              width: '100',
+              textAlign: 'center',
+              background: 'rgba(100, 100, 100, 0.1)',
+              marginRight: '4px',
+              marginBottom: '4px',
+              padding: '4px',
+            }}
+          >
+            <small>
+              <strong>{message.clientId}</strong>
+            </small>
+          </div>
+          {message.text}
+        </div>
+      ))}
     </>
   )
 }
@@ -43,6 +60,7 @@ const AddMessage = () => {
     const message: Message = {
       id: `${Math.random()}`,
       text: messageText,
+      clientId: yDoc.clientID,
     }
     dispatch(appSlice.actions.addMessage(message))
     setMessageText('')
@@ -64,6 +82,11 @@ const AddMessage = () => {
   )
 }
 
+const ReduxState: React.VFC = () => {
+  const data = useSelector(selectData)
+  return <div>Redux State:{JSON.stringify(data)}</div>
+}
+
 function App() {
   const [destroyed, setDestroyed] = useState(false)
   return (
@@ -77,6 +100,7 @@ function App() {
       <button onClick={() => setDestroyed(destroyed => !destroyed)}>
         {destroyed ? 'restore' : 'destroy'}
       </button>
+      <ReduxState />
     </div>
   )
 }

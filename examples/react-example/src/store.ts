@@ -14,6 +14,7 @@ import { debug } from './debug'
 export type Message = {
   id: string
   text: string
+  clientId: number
 }
 
 type AppState = { messages: Message[] }
