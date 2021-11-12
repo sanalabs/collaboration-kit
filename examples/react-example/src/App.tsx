@@ -83,7 +83,7 @@ const DestroyMyMessages: React.VFC = () => {
           )
         }
       >
-        Delete my messages
+        Delete all messages sent from the current client instance
       </button>
     </div>
   )

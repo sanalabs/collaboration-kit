@@ -53,7 +53,7 @@ export const EmojiAnimation: React.FC<{ count: number; emoji: string }> = ({ cou
 
   return (
     <>
-      {animations.map(({ id, x, y }) => (
+      {_.uniqBy(animations, 'id').map(({ id, x, y }) => (
         <EmojiContainer
           key={id}
           animate={{ x, y, opacity: 0 }}
