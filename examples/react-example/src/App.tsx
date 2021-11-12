@@ -129,6 +129,7 @@ const Controls = () => {
         backgroundColor: 'white',
         borderTop: '1px solid black',
         padding: '16px',
+        paddingBottom: '128px',
       }}
     >
       <div>
