@@ -117,7 +117,7 @@ const DemoContainer: React.FC = ({ children }) => {
     display: 'flex',
     gap: '16px',
     margin: '16px',
-    bottom: 0,
+    bottom: 128,
     right: 0,
   } as const
   return <div style={style}>{children}</div>
