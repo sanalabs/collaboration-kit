@@ -4,20 +4,26 @@ import {
   configureStore,
   createSelector,
   createSlice,
+  PayloadAction,
   Reducer,
 } from '@reduxjs/toolkit'
+import { JsonObject } from '@sanalabs/y-redux/dist/cjs/json/src'
 import { useDispatch } from 'react-redux'
 
-type AppState = { data: string }
+type AppState = { data: JsonObject }
 
 const initialAppState: AppState = {
-  data: 'hej',
+  data: { arr: ['hej'] },
 }
 
 export const appSlice = createSlice({
   name: 'app',
   initialState: initialAppState,
-  reducers: {},
+  reducers: {
+    setData(state, { payload }: PayloadAction<JsonObject>) {
+      return { data: payload }
+    },
+  },
 })
 
 export type RootState = {
