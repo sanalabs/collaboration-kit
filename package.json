@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "setup": "npm ci && npm ci --prefix json && npm ci --prefix y-json && npm ci --prefix y-react && npm ci --prefix y-redux",
+    "setup:dev": "npm ci && npm ci --prefix json && npm ci --prefix y-json && npm ci --prefix y-react && npm ci --prefix y-redux",
+    "setup:prod": "npm ci && npm ci --prefix json --only=prod && npm ci --prefix y-json --only=prod && npm ci --prefix y-react --only=prod && npm ci --prefix y-redux --only=prod",
     "check": "npm run check:format && npm run check:lint && npm run check:ts",
     "check:format": "prettier --check .",
     "check:lint": "eslint .",
