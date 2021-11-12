@@ -11,7 +11,8 @@
     "check:ts": "tsc --project tsconfig.json --noEmit",
     "test": "jest",
     "test:json": "jest --roots=json",
-    "test:y-json": "jest --roots=y-json"
+    "test:y-json": "jest --roots=y-json",
+    "build:netlify": "npm run setup:dev && cd y-redux && npm install && npm run build && cd .. && npm run clean:node_modules && npm run setup:prod && cd examples/react-example && npm ci && npm run build"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
