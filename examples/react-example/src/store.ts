@@ -7,21 +7,30 @@ import {
   PayloadAction,
   Reducer,
 } from '@reduxjs/toolkit'
-import { JsonObject } from '@sanalabs/y-redux/dist/cjs/json/src'
+import { deepPatchJson } from '@sanalabs/y-redux/dist/cjs/json/src'
 import { useDispatch } from 'react-redux'
 
-type AppState = { data: JsonObject }
+export type Message = {
+  id: string
+  text: string
+}
+
+type AppState = { messages: Message[] }
 
 const initialAppState: AppState = {
-  data: { arr: ['hej'] },
+  messages: [],
 }
 
 export const appSlice = createSlice({
   name: 'app',
   initialState: initialAppState,
   reducers: {
-    setData(state, { payload }: PayloadAction<JsonObject>) {
-      return { data: payload }
+    setData(state, { payload }: PayloadAction<{ messages: Message[] }>) {
+      deepPatchJson(state, payload)
+    },
+
+    addMessage(state, { payload }: PayloadAction<Message>) {
+      state.messages.push(payload)
     },
   },
 })
@@ -42,5 +51,5 @@ export const useAppDispatch = (): AppDispatch => useDispatch<AppDispatch>()
 
 export const selectData = createSelector(
   (state: RootState): AppState => state.app,
-  app => app.data,
+  app => app,
 )
