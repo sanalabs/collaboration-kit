@@ -9,6 +9,7 @@ import {
 } from '@reduxjs/toolkit'
 import { deepPatchJson } from '@sanalabs/y-redux/dist/cjs/json/src'
 import { useDispatch } from 'react-redux'
+import { debug } from './debug'
 
 export type Message = {
   id: string
@@ -26,10 +27,17 @@ export const appSlice = createSlice({
   initialState: initialAppState,
   reducers: {
     setData(state, { payload }: PayloadAction<{ messages: Message[] }>) {
+      debug('Performing actions.setData, payload:', JSON.stringify(payload), 'state: ', JSON.stringify(state))
       deepPatchJson(state, payload)
     },
 
     addMessage(state, { payload }: PayloadAction<Message>) {
+      debug(
+        'Performing actions.addMessage, payload:',
+        JSON.stringify(payload),
+        'state: ',
+        JSON.stringify(state),
+      )
       state.messages.push(payload)
     },
   },
@@ -51,5 +59,8 @@ export const useAppDispatch = (): AppDispatch => useDispatch<AppDispatch>()
 
 export const selectData = createSelector(
   (state: RootState): AppState => state.app,
-  app => app,
+  app => {
+    debug('Selecting local data:', JSON.stringify(app))
+    return app
+  },
 )

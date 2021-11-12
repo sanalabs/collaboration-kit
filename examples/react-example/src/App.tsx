@@ -3,24 +3,27 @@ import { useCallback, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { WebrtcProvider } from 'y-webrtc'
 import * as Y from 'yjs'
+import { debug } from './debug'
 import { appSlice, Message, selectData } from './store'
 
 const { yDoc, yProvider } = (() => {
   const yDoc = new Y.Doc()
-  console.log('connecting')
+  debug('Connecting webrtc provider')
   const yProvider = new WebrtcProvider('sana.example.chat', yDoc)
-  console.log(yDoc.getMap('data'))
 
   return { yDoc, yProvider }
 })()
-console.log('Created', yDoc, yProvider)
+debug('Created yjs provider', yProvider)
+debug('Created yjs doc', yDoc)
 
 const DisplayMessages = () => {
   const data = useSelector(selectData)
-  const yMap = useState(() => yDoc.getMap('data'))
+  const [yMap] = useState(() => yDoc.getMap('data'))
 
-  const setData = useCallback((data: { messages: Message[] }) => appSlice.actions.setData(data), [])
-  console.log(yDoc)
+  const setData = useCallback((data: { messages: Message[] }) => {
+    debug('Updating local data', JSON.stringify(data))
+    return appSlice.actions.setData(data)
+  }, [])
   return (
     <>
       <SyncYMap yMap={yMap} setData={setData} selectData={selectData} />
