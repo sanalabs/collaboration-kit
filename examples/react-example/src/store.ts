@@ -40,7 +40,7 @@ export const appSlice = createSlice({
   initialState: initialAppState,
   reducers: {
     setData(state, { payload }: PayloadAction<AppState>) {
-      debug('Performing actions.setData')
+      debug('Performing actions.setData', 'payload', JSON.stringify(payload), 'state', JSON.stringify(state))
       deepPatchJson(state, payload)
     },
 
