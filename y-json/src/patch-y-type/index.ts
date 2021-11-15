@@ -14,28 +14,31 @@ export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: JsonArray)
 export function patchYType(yTypeToMutate: any, newState: any): void {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
 
-  transact(yTypeToMutate, () => {
-    const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
-    const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
+  const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
+  const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
 
-    if (!isYArrayAndArray && !isYMapAndObject) {
-      throw new Error('Expected either a Y.Array and an Array, or a Y.Map and an object')
-    }
+  if (!isYArrayAndArray && !isYMapAndObject) {
+    throw new Error('Expected either a Y.Array and an Array, or a Y.Map and an object')
+  }
 
-    const oldState: unknown = yTypeToMutate.toJSON()
-    const delta = patchDiffJsonExtensions.diff(oldState, newState)
-    if (delta !== undefined && !_.isEqual(oldState, newState)) {
-      patchDiffJsonExtensions.patch(yTypeToMutate, delta)
-    }
-
-    const yState: unknown = yTypeToMutate.toJSON()
-    if (!_.isEqual(yState, newState)) {
-      throw new Error(
-        `Failed to patch yType. yType state: ${JSON.stringify(yState)}, expected state: ${JSON.stringify(
-          newState,
-        )}, oldState: ${JSON.stringify(oldState)}`,
-      )
-    }
+  const oldState: unknown = yTypeToMutate.toJSON()
+  const delta = patchDiffJsonExtensions.diff(oldState, newState)
+  if (delta === undefined || _.isEqual(oldState, newState)) {
+    console.log('patchYType: transact aborted')
     return
+  }
+
+  transact(yTypeToMutate, () => {
+    patchDiffJsonExtensions.patch(yTypeToMutate, delta)
   })
+
+  // Verify that patch was successful
+  const yState: unknown = yTypeToMutate.toJSON()
+  if (!_.isEqual(yState, newState)) {
+    throw new Error(
+      `Failed to patch yType. yType state: ${JSON.stringify(yState)}, expected state: ${JSON.stringify(
+        newState,
+      )}, oldState: ${JSON.stringify(oldState)}`,
+    )
+  }
 }
