@@ -7,20 +7,14 @@ import { debug } from './debug'
 import { ReactionsDemo } from './reactions-demo'
 import { appSlice, AppState, Message, selectData } from './store'
 
-const { yDoc, yProvider } = (() => {
-  const yDoc = new Y.Doc()
-  debug('Connecting webrtc provider')
-  const yProvider = new WebrtcProvider('sana.example.chat', yDoc)
-
-  return { yDoc, yProvider }
-})()
+const yDoc = new Y.Doc()
+debug('Connecting webrtc provider')
+const yProvider = new WebrtcProvider('sana.example.chat', yDoc)
 debug('Created yjs provider', yProvider)
 debug('Created yjs doc', yDoc)
 
-const DisplayMessages = () => {
-  const data = useSelector(selectData)
+const ChatProvider: React.FC = ({ children }) => {
   const [yMap] = useState(() => yDoc.getMap('data'))
-
   const setData = useCallback((data: AppState) => {
     debug('Updating local data', JSON.stringify(data))
     return appSlice.actions.setData(data)
@@ -28,6 +22,15 @@ const DisplayMessages = () => {
   return (
     <>
       <SyncYMap yMap={yMap} setData={setData} selectData={selectData} />
+      {children}
+    </>
+  )
+}
+
+const DisplayMessages = () => {
+  const data = useSelector(selectData)
+  return (
+    <>
       {data.messages?.map(message => (
         <div key={message.id} style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -155,7 +158,9 @@ const Controls = () => {
 function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <DisplayMessages />
+      <ChatProvider>
+        <DisplayMessages />
+      </ChatProvider>
       <Controls />
       <ReactionsDemo clientId={yDoc.clientID} />
       <ReduxState />

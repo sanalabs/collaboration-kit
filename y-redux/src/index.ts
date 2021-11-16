@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import _ from 'lodash'
+import { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
@@ -21,17 +22,23 @@ export const SyncYMap = <T extends JsonObject>({
 }): null => {
   const dispatch = useDispatch()
   const data = useSelector(selectData)
+  const dataRef = useRef(data)
 
   useEffect(() => {
     if (data === undefined) return
+    if (_.isEqual(data, dataRef.current)) return
+
+    dataRef.current = data
     patchYType(yMap, data)
   }, [yMap, data])
 
   useEffect(() => {
     const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      if (!transaction.local) {
-        dispatch(setData(yMap.toJSON() as T))
-      }
+      if (transaction.local) return
+      const newData = yMap.toJSON() as T
+      if (_.isEqual(newData, dataRef.current)) return
+
+      dispatch(setData(yMap.toJSON() as T))
     }
 
     yMap.observeDeep(observer)

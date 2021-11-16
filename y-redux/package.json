@@ -25,5 +25,9 @@
     "react-redux": "*",
     "y-protocols": "*",
     "yjs": "*"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.177",
+    "lodash": "^4.17.21"
   }
 }
