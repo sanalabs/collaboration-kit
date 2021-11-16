@@ -1,5 +1,6 @@
+import { patchYType } from '@sanalabs/y-json'
 import { SyncYMap } from '@sanalabs/y-redux'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { WebrtcProvider } from 'y-webrtc'
 import * as Y from 'yjs'
@@ -13,12 +14,44 @@ const yProvider = new WebrtcProvider('sana.example.chat', yDoc)
 debug('Created yjs provider', yProvider)
 debug('Created yjs doc', yDoc)
 
+const Loop: React.FC = () => {
+  useEffect(() => {
+    setTimeout(() => {
+      console.debug('[SyncYMap] patching in loop data 1')
+      patchYType(yDoc.getMap('data'), {
+        messages: [{ id: '1', text: '1', client: 1, name: '1' }],
+        reactions: {},
+      })
+      console.debug('[SyncYMap] patching in loop data 2')
+      patchYType(yDoc.getMap('data'), {
+        messages: [{ id: '2', text: '2', client: 2, name: '2' }],
+        reactions: {},
+      })
+      console.debug('[SyncYMap] patching complete')
+    }, 1000)
+  }, [])
+
+  // export type Message = {
+  //   id: string
+  //   text: string
+  //   clientId: number
+  //   name: string
+  // }
+
+  // export type AppState = {
+  //   messages: Message[]
+  //   reactions: ReactionStates
+  // }
+  return null
+}
+
 const ChatProvider: React.FC = ({ children }) => {
   const [yMap] = useState(() => yDoc.getMap('data'))
   const setData = useCallback((data: AppState) => {
     debug('Updating local data', JSON.stringify(data))
     return appSlice.actions.setData(data)
   }, [])
+
   return (
     <>
       <SyncYMap yMap={yMap} setData={setData} selectData={selectData} />
@@ -164,6 +197,8 @@ function App() {
       <Controls />
       <ReactionsDemo clientId={yDoc.clientID} />
       <ReduxState />
+
+      <Loop />
     </div>
   )
 }

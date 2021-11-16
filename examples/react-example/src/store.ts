@@ -40,7 +40,7 @@ export const appSlice = createSlice({
   initialState: initialAppState,
   reducers: {
     setData(state, { payload }: PayloadAction<AppState>) {
-      debug('Performing actions.setData', 'payload', JSON.stringify(payload), 'state', JSON.stringify(state))
+      console.debug('[SyncYMap] dispatch', payload)
       deepPatchJson(state, payload)
     },
 
@@ -86,7 +86,7 @@ export const useAppDispatch = (): AppDispatch => useDispatch<AppDispatch>()
 const selectApp = (state: RootState): AppState => state.app
 
 export const selectData = createSelector(selectApp, app => {
-  debug('Selecting local data')
+  console.debug('[SyncYMap] select', JSON.stringify(app))
   return app
 })
 

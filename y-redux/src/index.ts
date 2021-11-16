@@ -25,6 +25,10 @@ export const SyncYMap = <T extends JsonObject>({
   const dataRef = useRef(data)
 
   useEffect(() => {
+    console.debug('[SyncYMap] start')
+  }, [])
+
+  useEffect(() => {
     if (data === undefined) {
       console.debug('[SyncYMap] local data undefined')
       return
@@ -33,7 +37,7 @@ export const SyncYMap = <T extends JsonObject>({
       console.debug('[SyncYMap] local data unchanged')
       return
     }
-    console.debug('[SyncYMap] posting local data', JSON.stringify(data))
+    console.debug('[SyncYMap] patch', JSON.stringify(data), `time: ${Date.now()}`)
 
     dataRef.current = data
     patchYType(yMap, data)
@@ -41,14 +45,14 @@ export const SyncYMap = <T extends JsonObject>({
 
   useEffect(() => {
     const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      if (transaction.local) return
+      // if (transaction.local) return
       const newData = yMap.toJSON() as T
       if (_.isEqual(newData, dataRef.current)) {
         console.debug('[SyncYMap] remote data unchanged')
         return
       }
 
-      console.debug('[SyncYMap] remote data changed', newData)
+      console.debug('[SyncYMap] remote changed', JSON.stringify(newData))
       dispatch(setData(newData))
     }
 

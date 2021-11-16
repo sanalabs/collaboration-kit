@@ -36,9 +36,9 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
   const yState: unknown = yTypeToMutate.toJSON()
   if (!_.isEqual(yState, newState)) {
     throw new Error(
-      `Failed to patch yType. yType state: ${JSON.stringify(yState)}, expected state: ${JSON.stringify(
-        newState,
-      )}, oldState: ${JSON.stringify(oldState)}`,
+      `Failed to patch yType. 
+       ${JSON.stringify({ yState, newState, oldState, delta }, null, 2)} 
+      `,
     )
   }
 }
