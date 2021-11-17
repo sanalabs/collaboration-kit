@@ -6,7 +6,7 @@ import { WebrtcProvider } from 'y-webrtc'
 import * as Y from 'yjs'
 import { debug } from './debug'
 import { ReactionsDemo } from './reactions-demo'
-import { appSlice, AppState, Message, selectData, store } from './store'
+import { appSlice, AppState, Message, selectData } from './store'
 
 const yDoc = new Y.Doc()
 debug('Connecting webrtc provider')
@@ -123,7 +123,7 @@ const ChatProvider: React.FC = ({ children }) => {
 
   return (
     <>
-      <SyncYMap yMap={yMap} setData={setData} selectData={selectData} getState={store.getState} />
+      <SyncYMap yMap={yMap} setData={setData} selectData={selectData} />
       {children}
     </>
   )
