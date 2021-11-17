@@ -103,4 +103,28 @@ describe('patchYType tests', () => {
       { numRuns: 1000 },
     )
   })
+
+  it('is possible to specify the origin of a transaction', () => {
+    const yMap = utils.makeYMap()
+    let receivedOrigin: unknown = undefined
+    yMap.observeDeep((e, { origin }) => {
+      receivedOrigin = origin
+    })
+    patchYType(yMap, { state: '1' }, { origin: 'test' })
+    expect(receivedOrigin).toEqual('test')
+  })
+
+  it('chained patchYTypes do not cause equality issues', () => {
+    const yMap = utils.makeYMap()
+    yMap.observeDeep((e, { origin }) => {
+      if (origin === 'test') {
+        expect(yMap.toJSON()).toEqual({ state: '1' })
+        patchYType(yMap, { state: '2' }, { origin: 'test-2' })
+        return
+      }
+      if (origin !== 'test-2') throw new Error('unexpected origin')
+    })
+    patchYType(yMap, { state: '1' }, { origin: 'test' })
+    expect(yMap.toJSON()).toEqual({ state: '2' })
+  })
 })
