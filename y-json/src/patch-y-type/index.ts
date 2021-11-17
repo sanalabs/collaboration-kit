@@ -33,7 +33,7 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
     console.debug('[SyncYMap] Attemping patch')
     patchDiffJsonExtensions.patch(yTypeToMutate, delta)
 
-    // Verify that patch was successful
+    // Verify that the patch was successful
     const yState: unknown = yTypeToMutate.toJSON()
     if (!_.isEqual(yState, newState)) {
       throw new Error(

@@ -1,6 +1,5 @@
-import { patchYType } from '@sanalabs/y-json'
 import { SyncYMap } from '@sanalabs/y-redux'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { WebrtcProvider } from 'y-webrtc'
 import * as Y from 'yjs'
@@ -27,12 +26,10 @@ const Loop: React.FC = () => {
       //   messages: [{ id: '2', text: '2', client: 2, name: '2' }],
       //   reactions: {},
       // })
-
-      patchYType(yDoc.getMap('data'), {
-        messages: [{ id: Math.random(), text: 'Hello humans', client: 1234, name: 'Sana Bot 🤖' }],
-        reactions: {},
-      })
-
+      // patchYType(yDoc.getMap('data'), {
+      //   messages: [{ id: Math.random(), text: 'Hello humans', client: 1234, name: 'Sana Bot 🤖' }],
+      //   reactions: {},
+      // })
       // const messages: AppState['messages'] = []
       // _.range(0, 100)
       //   .map((i): Message => ({ id: `${i}`, text: `${i}`, clientId: i, name: `${i}` }))
@@ -81,7 +78,7 @@ const getDuplicates = (array: readonly string[]): readonly string[] =>
 const LoopDetector: React.VFC = () => {
   const data = useSelector(selectData)
   useEffect(() => {
-    if (data === undefined) return
+    if (data === undefined || data.messages === undefined) return
     const ids = data.messages.map(it => it.id)
     if (hasDuplicates(ids)) {
       throw new Error(`[LOOP DETECTED]
@@ -95,10 +92,19 @@ const LoopDetector: React.VFC = () => {
 
 const DisplayMessages: React.VFC = () => {
   const data = useSelector(selectData)
+  const latestMessageRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (latestMessageRef.current === null) return
+
+    const element = latestMessageRef.current
+    element.scrollIntoView({ behavior: 'smooth' })
+  }, [latestMessageRef])
+
   return (
-    <>
-      {data.messages?.map(message => (
-        <div key={message.id} style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ flexGrow: 1 }}>
+      {data?.messages?.map(message => (
+        <div ref={latestMessageRef} key={message.id} style={{ display: 'flex', alignItems: 'center' }}>
           <div
             style={{
               width: '100',
@@ -116,7 +122,7 @@ const DisplayMessages: React.VFC = () => {
           {message.text}
         </div>
       ))}
-    </>
+    </div>
   )
 }
 
@@ -125,34 +131,19 @@ const ReduxState: React.VFC = () => {
   return <div>Redux State:{JSON.stringify(data)}</div>
 }
 
-const DestroyReduxState: React.VFC = () => {
+const Initialize: React.VFC = () => {
   const dispatch = useDispatch()
   const data = useSelector(selectData)
-  return (
-    <div>
-      <button onClick={() => dispatch(appSlice.actions.setData({ ...data, messages: [] }))}>
-        Delete all messages
-      </button>
-    </div>
-  )
-}
-
-const DestroyMyMessages: React.VFC = () => {
-  const dispatch = useDispatch()
-  const data = useSelector(selectData)
-  return (
+  return data !== undefined ? null : (
     <div>
       <button
-        onClick={() =>
-          dispatch(
-            appSlice.actions.setData({
-              ...data,
-              messages: data.messages.filter(it => it.clientId !== yDoc.clientID),
-            }),
-          )
-        }
+        onClick={() => {
+          const initialState = { reactions: {}, messages: [] }
+          console.debug('Resetting state:', initialState)
+          dispatch(appSlice.actions.setData(initialState))
+        }}
       >
-        Delete all messages sent from the current client instance
+        Initialize Redux state
       </button>
     </div>
   )
@@ -164,6 +155,7 @@ const setNameInLocalStorage = (newName: string): void => {
 }
 
 const Controls = () => {
+  const data = useSelector(selectData)
   const dispatch = useDispatch()
   const [messageText, setMessageText] = useState<string>('')
   const [name, setName] = useState<string>(() => readNameFromLocalStorage() ?? '')
@@ -190,7 +182,6 @@ const Controls = () => {
   return (
     <div
       style={{
-        position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
@@ -201,13 +192,15 @@ const Controls = () => {
         paddingBottom: '128px',
       }}
     >
-      <div>
+      <Initialize />
+
+      <div style={{ marginTop: '16px' }}>
         <input type='text' placeholder='name' value={name} onChange={e => updateName(e.target.value)} />
       </div>
       <input
         type='text'
         placeholder={hasName ? 'message' : 'enter a name first'}
-        disabled={!hasName}
+        disabled={!hasName || data === undefined}
         value={messageText}
         onChange={e => setMessageText(e.target.value)}
         onKeyDown={e => {
@@ -215,8 +208,6 @@ const Controls = () => {
         }}
       />
       <button onClick={sendMessage}>Submit</button>
-      <DestroyReduxState />
-      <DestroyMyMessages />
     </div>
   )
 }
@@ -229,7 +220,7 @@ function App() {
       </ChatProvider>
       <Controls />
       <ReactionsDemo clientId={yDoc.clientID} />
-      <ReduxState />
+      {/* <ReduxState /> */}
 
       <Loop />
       <LoopDetector />

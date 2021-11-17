@@ -26,12 +26,12 @@ export type Message = {
 }
 
 export type AppState = {
-  messages: Message[]
+  messages?: Message[]
   reactions: ReactionStates
 }
 
 const initialAppState: AppState = {
-  messages: [],
+  messages: undefined,
   reactions: {},
 }
 
@@ -41,10 +41,16 @@ export const appSlice = createSlice({
   reducers: {
     setData(state, { payload }: PayloadAction<AppState>) {
       console.debug('[SyncYMap] dispatch', payload)
-      deepPatchJson(state, payload)
+      if (state.messages === undefined) {
+        return payload
+      } else {
+        deepPatchJson(state, payload)
+      }
     },
 
     addMessage(state, { payload }: PayloadAction<Message>) {
+      if (state.messages === undefined) return
+
       debug(
         'Performing actions.addMessage, payload:',
         JSON.stringify(payload),
@@ -87,6 +93,7 @@ const selectApp = (state: RootState): AppState => state.app
 
 export const selectData = createSelector(selectApp, app => {
   console.debug('[SyncYMap] select', JSON.stringify(app))
+  if (app.messages === undefined) return undefined
   return app
 })
 

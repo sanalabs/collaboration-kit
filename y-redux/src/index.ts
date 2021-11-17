@@ -47,7 +47,7 @@ export const SyncYMap = <T extends JsonObject, RootState>({
 
   useEffect(() => {
     const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      // if (transaction.local) return
+      if (transaction.local) return
       const newData = yMap.toJSON() as T
       const latestReduxData = selectData(getState())
       if (_.isEqual(newData, latestReduxData)) {
