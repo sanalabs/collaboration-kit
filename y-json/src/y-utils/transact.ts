@@ -17,7 +17,7 @@ export function transact(yType: Y.Map<unknown> | Y.Array<unknown>, transaction: 
 
       console.debug(`[SyncYMap] [${id}] Starting transaction:`, doc.clientID, ongoingTransactions.has(doc))
       ongoingTransactions.add(doc)
-      transaction
+      transaction()
       console.debug(`[SyncYMap] [${id}] Ending transaction:`, doc.clientID, ongoingTransactions.has(doc))
       ongoingTransactions.delete(doc)
     })

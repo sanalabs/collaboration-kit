@@ -17,16 +17,30 @@ debug('Created yjs doc', yDoc)
 const Loop: React.FC = () => {
   useEffect(() => {
     setTimeout(() => {
-      console.debug('[SyncYMap] patching in loop data 1')
+      // console.debug('[SyncYMap] patching in loop data 1')
+      // patchYType(yDoc.getMap('data'), {
+      //   messages: [{ id: '1', text: '1', client: 1, name: '1' }],
+      //   reactions: {},
+      // })
+      // console.debug('[SyncYMap] patching in loop data 2')
+      // patchYType(yDoc.getMap('data'), {
+      //   messages: [{ id: '2', text: '2', client: 2, name: '2' }],
+      //   reactions: {},
+      // })
+
       patchYType(yDoc.getMap('data'), {
-        messages: [{ id: '1', text: '1', client: 1, name: '1' }],
+        messages: [{ id: Math.random(), text: 'Hello humans', client: 1234, name: 'Sana Bot 🤖' }],
         reactions: {},
       })
-      console.debug('[SyncYMap] patching in loop data 2')
-      patchYType(yDoc.getMap('data'), {
-        messages: [{ id: '2', text: '2', client: 2, name: '2' }],
-        reactions: {},
-      })
+
+      // const messages: AppState['messages'] = []
+      // _.range(0, 100)
+      //   .map((i): Message => ({ id: `${i}`, text: `${i}`, clientId: i, name: `${i}` }))
+      //   .forEach(message => {
+      //     messages.push(message)
+      //     console.debug('[SyncYMap] patching in loop data 2')
+      //     patchYType(yDoc.getMap('data'), { messages, reactions: {} })
+      //   })
     }, 1000)
   }, [])
 
@@ -59,7 +73,27 @@ const ChatProvider: React.FC = ({ children }) => {
   )
 }
 
-const DisplayMessages = () => {
+const hasDuplicates = (array: readonly string[]): boolean => array.length !== new Set(array).size
+
+const getDuplicates = (array: readonly string[]): readonly string[] =>
+  Array.from(new Set(array.filter((v, i, a) => a.indexOf(v) !== i)))
+
+const LoopDetector: React.VFC = () => {
+  const data = useSelector(selectData)
+  useEffect(() => {
+    if (data === undefined) return
+    const ids = data.messages.map(it => it.id)
+    if (hasDuplicates(ids)) {
+      throw new Error(`[LOOP DETECTED]
+      Duplicate ids detected in messages.
+      Duplicates: ${getDuplicates(ids)}
+      Messages: ${JSON.stringify(data.messages)}`)
+    }
+  }, [data])
+  return null
+}
+
+const DisplayMessages: React.VFC = () => {
   const data = useSelector(selectData)
   return (
     <>
@@ -198,6 +232,7 @@ function App() {
       <ReduxState />
 
       <Loop />
+      <LoopDetector />
     </div>
   )
 }

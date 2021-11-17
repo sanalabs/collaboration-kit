@@ -12,6 +12,7 @@ import * as patchDiffJsonExtensions from './patch-diff-json-extensions'
 export function patchYType(yTypeToMutate: Y.Map<unknown>, newState: JsonObject): void
 export function patchYType(yTypeToMutate: Y.Array<unknown>, newState: JsonArray): void
 export function patchYType(yTypeToMutate: any, newState: any): void {
+  console.debug(`[SyncYMap] Starting patch ${JSON.stringify(newState)}`)
   assertIsYMapOrArray(yTypeToMutate, 'object root')
 
   const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
@@ -24,11 +25,12 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
   const oldState: unknown = yTypeToMutate.toJSON()
   const delta = patchDiffJsonExtensions.diff(oldState, newState)
   if (delta === undefined || _.isEqual(oldState, newState)) {
-    console.log('patchYType: transact aborted')
+    console.debug('[patchYType]: no changes detected')
     return
   }
 
   transact(yTypeToMutate, () => {
+    console.debug('[SyncYMap] Attemping patch')
     patchDiffJsonExtensions.patch(yTypeToMutate, delta)
 
     // Verify that patch was successful
@@ -40,5 +42,6 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
         `,
       )
     }
+    console.debug(`[SyncYMap] Patch successful ${JSON.stringify(yState)}`)
   })
 }
