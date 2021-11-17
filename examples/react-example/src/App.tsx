@@ -161,7 +161,7 @@ const DisplayMessages: React.VFC = () => {
   }, [latestMessageRef])
 
   return (
-    <div style={{ flexGrow: 1 }}>
+    <div style={{ flexGrow: 1, paddingBottom: '184px' }}>
       {data?.messages?.map(message => (
         <div ref={latestMessageRef} key={message.id} style={{ display: 'flex', alignItems: 'center' }}>
           <div
@@ -249,10 +249,11 @@ const Controls = () => {
         left: 0,
         right: 0,
         width: '100%',
+        height: '150px',
+        position: 'fixed',
         backgroundColor: 'white',
         borderTop: '1px solid black',
         padding: '16px',
-        paddingBottom: '128px',
       }}
     >
       <Initialize />
