@@ -14,6 +14,7 @@
     "build": "npm run build:cjs && npm run build:esm"
   },
   "devDependencies": {
+    "@sanalabs/y-json": "file:../y-json",
     "@types/react": "^17.0.30",
     "react": "^17.0.2",
     "react-redux": "7.2.6",
@@ -21,6 +22,7 @@
     "yjs": "^13.5.16"
   },
   "peerDependencies": {
+    "@sanalabs/y-json": "*",
     "react": "*",
     "react-redux": "*",
     "y-protocols": "*",

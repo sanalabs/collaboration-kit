@@ -9,15 +9,17 @@ let id = Math.random()
 export function transact(yType: Y.Map<unknown> | Y.Array<unknown>, transaction: () => void): void {
   const { doc } = yType
   if (doc !== null) {
-    if (ongoingTransactions.has(doc)) {
-      console.error('NESTED TRANSACTION DETECTED')
-      throw new Error(`Nested transaction detected in doc: ${JSON.stringify(doc)}`)
-    }
+    doc.transact(() => {
+      if (ongoingTransactions.has(doc)) {
+        console.error('NESTED TRANSACTION DETECTED')
+        throw new Error(`Nested transaction detected in doc: ${JSON.stringify(doc)}`)
+      }
 
-    console.debug(`[SyncYMap] [${id}] Starting transaction:`, doc.clientID, ongoingTransactions.has(doc))
-    ongoingTransactions.add(doc)
-    doc.transact(transaction)
-    console.debug(`[SyncYMap] [${id}] Ending transaction:`, doc.clientID, ongoingTransactions.has(doc))
-    ongoingTransactions.delete(doc)
+      console.debug(`[SyncYMap] [${id}] Starting transaction:`, doc.clientID, ongoingTransactions.has(doc))
+      ongoingTransactions.add(doc)
+      transaction
+      console.debug(`[SyncYMap] [${id}] Ending transaction:`, doc.clientID, ongoingTransactions.has(doc))
+      ongoingTransactions.delete(doc)
+    })
   } else transaction()
 }

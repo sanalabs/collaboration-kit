@@ -30,15 +30,15 @@ export function patchYType(yTypeToMutate: any, newState: any): void {
 
   transact(yTypeToMutate, () => {
     patchDiffJsonExtensions.patch(yTypeToMutate, delta)
-  })
 
-  // Verify that patch was successful
-  const yState: unknown = yTypeToMutate.toJSON()
-  if (!_.isEqual(yState, newState)) {
-    throw new Error(
-      `Failed to patch yType. 
-       ${JSON.stringify({ yState, newState, oldState, delta }, null, 2)} 
-      `,
-    )
-  }
+    // Verify that patch was successful
+    const yState: unknown = yTypeToMutate.toJSON()
+    if (!_.isEqual(yState, newState)) {
+      throw new Error(
+        `Failed to patch yType. 
+        ${JSON.stringify({ yState, newState, oldState, delta }, null, 2)} 
+        `,
+      )
+    }
+  })
 }

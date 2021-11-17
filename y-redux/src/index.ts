@@ -1,53 +1,56 @@
+import { patchYType } from '@sanalabs/y-json'
 import _ from 'lodash'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 import { JsonObject } from '../../json/src'
-import { patchYType } from '../../y-json/src'
 
 export type BaseAwarenessState = {
   clientId: number
   isCurrentClient: boolean
 }
 
-export const SyncYMap = <T extends JsonObject>({
+export const SyncYMap = <T extends JsonObject, RootState>({
   yMap,
   setData,
   selectData,
+  getState,
 }: {
   yMap: Y.Map<T>
   setData: (data: T) => any
-  selectData: (state: any) => T | undefined
+  selectData: (state: RootState) => T | undefined
+  getState: () => RootState
 }): null => {
   const dispatch = useDispatch()
   const data = useSelector(selectData)
-  const dataRef = useRef(data)
 
   useEffect(() => {
     console.debug('[SyncYMap] start')
   }, [])
 
   useEffect(() => {
-    if (data === undefined) {
+    // The latest data from the selector is not necessarily the latest data from Redux.
+    // TODO: find out how to best get the latest state from Redux directly.
+    const latestData = selectData(getState())
+    if (!_.isEqual(latestData, data)) {
+      console.debug('[SyncYMap] Race detected!! SyncYMap is not rendering with the latest data from redux.')
+    }
+    if (latestData === undefined) {
       console.debug('[SyncYMap] local data undefined')
       return
     }
-    if (_.isEqual(data, dataRef.current)) {
-      console.debug('[SyncYMap] local data unchanged')
-      return
-    }
-    console.debug('[SyncYMap] patch', JSON.stringify(data), `time: ${Date.now()}`)
 
-    dataRef.current = data
-    patchYType(yMap, data)
+    console.debug('[SyncYMap] patch', JSON.stringify(latestData), `time: ${Date.now()}`)
+    patchYType(yMap, latestData)
   }, [yMap, data])
 
   useEffect(() => {
     const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
       // if (transaction.local) return
       const newData = yMap.toJSON() as T
-      if (_.isEqual(newData, dataRef.current)) {
+      const latestReduxData = selectData(getState())
+      if (_.isEqual(newData, latestReduxData)) {
         console.debug('[SyncYMap] remote data unchanged')
         return
       }
