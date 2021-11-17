@@ -12,7 +12,8 @@
     "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm",
-    "test": "jest"
+    "test": "jest",
+    "build:example": "npm i && npm run build && rm -rf node_modules"
   },
   "devDependencies": {
     "fast-check": "^2.19.0",

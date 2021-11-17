@@ -12,7 +12,7 @@
     "test": "jest",
     "test:json": "jest --roots=json",
     "test:y-json": "jest --roots=y-json",
-    "build:netlify": "npm run setup:dev && cd y-redux && npm install && npm run build && cd .. && npm run clean:node_modules && npm run setup:prod && cd examples/react-example && npm ci && npm run build"
+    "build:netlify": "npm run clean && cd json && npm i && echo 'Built json!' && cd .. && cd y-json && npm run build:example && echo 'Built y-json!' && cd .. && cd y-redux && npm run build:example && echo 'Built y-redux!' && cd .. && cd examples/react-example && npm i; npm run build"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
