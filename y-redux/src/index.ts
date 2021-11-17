@@ -1,7 +1,7 @@
 import { patchYType } from '@sanalabs/y-json'
 import _ from 'lodash'
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector, useStore } from 'react-redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 import { JsonObject } from '../../json/src'
@@ -15,54 +15,73 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   yMap,
   setData,
   selectData,
-  getState,
 }: {
   yMap: Y.Map<T>
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
-  getState: () => RootState
 }): null => {
   const dispatch = useDispatch()
-  const data = useSelector(selectData)
+  const localData = useSelector(selectData)
+  const store = useStore()
 
   useEffect(() => {
     console.debug('[SyncYMap] start')
   }, [])
 
   useEffect(() => {
-    // The latest data from the selector is not necessarily the latest data from Redux.
-    // TODO: find out how to best get the latest state from Redux directly.
-    const latestData = selectData(getState())
-    if (!_.isEqual(latestData, data)) {
-      console.debug('[SyncYMap] Race detected!! SyncYMap is not rendering with the latest data from redux.')
+    console.debug('[SyncYMap] store changed', store)
+  }, [store])
+
+  // The origin of the yjs transactions committed by collaboration-kit
+  // For context see: https://discuss.yjs.dev/t/determining-whether-a-transaction-is-local/361/3
+  const [origin] = useState(() => `collaboration-kit:sync:${Math.random()}`)
+
+  useEffect(() => {
+    // This hook patches the latest Redux data into the yDoc.
+    // Note: this hook is triggered whenever the selector changes, and this selector
+    // may update faster than this component can render. In such a case, there would be
+    // a queue of states that would be patched into the yDoc. All of these states
+    // (except the very latest) would be out of sync with the yDoc, and patching them in
+    // would cause the old states to be redistributed to the other clients. In some cases
+    // (especially with lots of state updates and  many clients), this would lead to infinite
+    // loops which would crash the browser entirely. To fix this, we need to ensure that we
+    // always patch the latest state from the Redux store into the yDoc.
+    const latestRedux = selectData(store.getState())
+    if (!_.isEqual(latestRedux, localData)) {
+      console.debug(
+        '[SyncYMap] Data Race prevented. SyncYmap will read the latest state from Redux directly.',
+      )
     }
-    if (latestData === undefined) {
-      console.debug('[SyncYMap] local data undefined')
+    if (latestRedux === undefined) {
+      console.debug(
+        '[SyncYMap] Redux data returned undefined. The data has most likely not been synced with the other clients yet.',
+      )
       return
     }
 
-    console.debug('[SyncYMap] patch', JSON.stringify(latestData), `time: ${Date.now()}`)
-    patchYType(yMap, latestData)
-  }, [yMap, data])
+    patchYType(yMap, latestRedux, { origin })
+  }, [yMap, localData, store, selectData, origin])
 
   useEffect(() => {
     const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      if (transaction.local) return
+      if (transaction.origin === origin) return
+
       const newData = yMap.toJSON() as T
-      const latestReduxData = selectData(getState())
+      const latestReduxData = selectData(store.getState())
+
       if (_.isEqual(newData, latestReduxData)) {
         console.debug('[SyncYMap] remote data unchanged')
         return
       }
 
-      console.debug('[SyncYMap] remote changed', JSON.stringify(newData))
+      console.debug('[SyncYMap] remote data changed')
       dispatch(setData(newData))
     }
 
     yMap.observeDeep(observer)
 
     return () => yMap.unobserveDeep(observer)
-  }, [yMap, dispatch, setData])
+  }, [yMap, dispatch, setData, store, origin])
 
   return null
 }
