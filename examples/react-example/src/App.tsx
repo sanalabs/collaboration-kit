@@ -1,5 +1,6 @@
 import { SyncYMap } from '@sanalabs/y-redux'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import _ from 'lodash'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { WebrtcProvider } from 'y-webrtc'
 import * as Y from 'yjs'
@@ -12,6 +13,64 @@ debug('Connecting webrtc provider')
 const yProvider = new WebrtcProvider('sana.example.chat', yDoc)
 debug('Created yjs provider', yProvider)
 debug('Created yjs doc', yDoc)
+
+const getAwarenessStates = (): [id: number, state: unknown][] => {
+  return Array.from(yProvider.awareness.getStates().entries())
+}
+
+const ActivePeople = () => {
+  const [state, setState] = useState(getAwarenessStates())
+  useEffect(() => {
+    const observe = (state: unknown) => {
+      setState(getAwarenessStates())
+    }
+
+    yProvider.awareness.on('change', observe)
+    return () => yProvider.off('change', observe)
+  }, [setState])
+
+  const people: { id: number; name: string }[] = useMemo(() => {
+    return _.chain(state)
+      .flatMap(([id, state]) => {
+        if (!(state instanceof Object)) return []
+        if (state === null) return []
+        if (!('name' in state)) return []
+        const name = state['name']
+        if (typeof name !== 'string') return []
+
+        return [{ id, name }]
+      })
+      .sortBy('name')
+      .value()
+  }, [state])
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        zIndex: 1000,
+        width: '200px',
+        padding: '16px',
+        backgroundColor: 'white',
+        border: '1px dashed black',
+      }}
+    >
+      <p>
+        <strong>Online</strong>
+      </p>
+
+      {people.map(({ name, id }) => (
+        <div key={id}>
+          <strong>
+            <small>{name}</small>
+          </strong>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const Loop: React.FC = () => {
   useEffect(() => {
@@ -165,6 +224,10 @@ const Controls = () => {
     setName(newName)
   }
 
+  useEffect(() => {
+    yProvider.awareness.setLocalStateField('name', name)
+  }, [name])
+
   const sendMessage = useCallback(() => {
     if (messageText === '') return
 
@@ -215,6 +278,7 @@ const Controls = () => {
 function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <ActivePeople />
       <ChatProvider>
         <DisplayMessages />
       </ChatProvider>
