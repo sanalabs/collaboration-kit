@@ -1,7 +1,8 @@
+import React from 'react'
 import { Provider, useSelector } from 'react-redux'
 import { selectData, store } from './store'
 
-const Comp = () => {
+const Comp: React.VFC = () => {
   const data = useSelector(selectData)
   return <>selected data: {data}</>
 }

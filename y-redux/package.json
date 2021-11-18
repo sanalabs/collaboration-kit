@@ -1,6 +1,6 @@
 {
   "name": "@sanalabs/y-redux",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Redux state synced with Yjs",
   "license": "ISC",
   "main": "dist/cjs/y-redux/src/index.js",
@@ -11,19 +11,26 @@
   "scripts": {
     "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
-    "build": "npm run build:cjs && npm run build:esm"
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:example": "npm i && npm run build"
   },
   "devDependencies": {
+    "@sanalabs/y-json": "file:../y-json",
     "@types/react": "^17.0.30",
     "react": "^17.0.2",
-    "react-redux": "^7.2.5",
+    "react-redux": "7.2.6",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.16"
   },
   "peerDependencies": {
+    "@sanalabs/y-json": "*",
     "react": "*",
     "react-redux": "*",
     "y-protocols": "*",
     "yjs": "*"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.177",
+    "lodash": "^4.17.21"
   }
 }

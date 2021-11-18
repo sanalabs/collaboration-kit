@@ -59,19 +59,18 @@ const arrayOperations = (
     .value()
 
   return {
-    insertions: entries.flatMap(([key, operation]) =>
+    insertions: _.flatMap(entries, ([key, operation]) =>
       isInsertion(operation) ? [[key, unknownToYTypeOrPrimitive(operation[0])]] : [],
     ),
-    deletions: entries
-      .flatMap(([key, operation]) => (isDeletion(operation) ? [key] : []))
+    deletions: _.flatMap(entries, ([key, operation]) => (isDeletion(operation) ? [key] : []))
       // Delete indices are relative to the original array. By traversing them in
       // reverse order we do not need to worry about deletes at a lower index value
       // affecting the indices of deletes at larger index values.
       .reverse(),
-    updates: entries.flatMap(([key, operation]) =>
+    updates: _.flatMap(entries, ([key, operation]) =>
       isUpdate(operation) ? [[key, unknownToYTypeOrPrimitive(operation[1])]] : [],
     ),
-    nestedUpdates: entries.flatMap(([key, nestedDelta]) =>
+    nestedUpdates: _.flatMap(entries, ([key, nestedDelta]) =>
       isNestedDelta(nestedDelta) ? [[key, nestedDelta]] : [],
     ),
   }
@@ -88,14 +87,14 @@ const objectOperations = (
   const entries = _.entries(delta)
 
   return {
-    insertions: entries.flatMap(([key, operation]) =>
+    insertions: _.flatMap(entries, ([key, operation]) =>
       isInsertion(operation) ? [[key, unknownToYTypeOrPrimitive(operation[0])]] : [],
     ),
-    deletions: entries.flatMap(([key, operation]) => (isDeletion(operation) ? [key] : [])),
-    updates: entries.flatMap(([key, operation]) =>
+    deletions: _.flatMap(entries, ([key, operation]) => (isDeletion(operation) ? [key] : [])),
+    updates: _.flatMap(entries, ([key, operation]) =>
       isUpdate(operation) ? [[key, unknownToYTypeOrPrimitive(operation[1])]] : [],
     ),
-    nestedUpdates: entries.flatMap(([key, nestedDelta]) =>
+    nestedUpdates: _.flatMap(entries, ([key, nestedDelta]) =>
       isNestedDelta(nestedDelta) ? [[key, nestedDelta]] : [],
     ),
   }
