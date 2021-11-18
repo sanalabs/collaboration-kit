@@ -17,7 +17,7 @@
     "build:y-json": "npm i --prefix y-json && npm run --prefix y-json build:example",
     "build:y-redux": "npm i --prefix y-redux && npm run --prefix y-redux build:example",
     "build:react-example": "npm i --prefix examples/react-example && npm run --prefix examples/react-example build",
-    "build:all": "npm run build:json && npm run build:y-react && npm run build:y-json && npm run build:y-redux && npm run build:react-example",
+    "build:all": "npm i && npm run build:json && npm run build:y-react && npm run build:y-json && npm run build:y-redux && npm run build:react-example",
     "build:netlify": "npm run build:all",
     "dev:example": "npm run build:all && rm -rf y-json/node_modules && rm -rf y-redux/node_modules && npm run --prefix examples/react-example start"
   },
