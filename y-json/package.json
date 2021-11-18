@@ -13,7 +13,7 @@
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm",
     "test": "jest",
-    "build:example": "npm i && npm run build && rm -rf node_modules"
+    "build:example": "npm i && npm run build"
   },
   "devDependencies": {
     "fast-check": "^2.19.0",

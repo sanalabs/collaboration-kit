@@ -15,9 +15,10 @@
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "lib": ["es2017"],
+    "lib": ["es2017", "DOM"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "jsx": "react"
   }
 }
