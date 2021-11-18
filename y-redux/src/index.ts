@@ -97,11 +97,18 @@ export const SyncYAwareness = <T extends JsonObject>({
 }): null => {
   const dispatch = useDispatch()
   const localAwarenessState = useSelector(selectLocalAwarenessState)
+  const store = useStore()
 
   useEffect(() => {
-    if (localAwarenessState === undefined) return
-    awareness.setLocalState(localAwarenessState)
-  }, [awareness, localAwarenessState])
+    const latestReduxAwareness = selectLocalAwarenessState(store.getState())
+    if (latestReduxAwareness === undefined) return
+    if (!_.isEqual(latestReduxAwareness, localAwarenessState)) {
+      console.debug(
+        '[SyncYAwareness] Data Race prevented. SyncYAwareness will read the latest state from Redux directly.',
+      )
+    }
+    awareness.setLocalState(latestReduxAwareness)
+  }, [awareness, localAwarenessState, store, selectLocalAwarenessState])
 
   useEffect(() => {
     const handler = (): void => {
@@ -111,6 +118,12 @@ export const SyncYAwareness = <T extends JsonObject>({
         clientId,
         isCurrentClient: awareness.clientID === clientId,
       })) as (BaseAwarenessState & T)[]
+
+      const latestReduxAwareness = selectLocalAwarenessState(store.getState())
+      if (_.isEqual(states, latestReduxAwareness)) {
+        console.debug('[SyncYAwareness] remote data unchanged')
+        return
+      }
 
       dispatch(setAwarenessStates(states))
     }
