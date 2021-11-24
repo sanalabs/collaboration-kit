@@ -13,10 +13,12 @@
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm",
     "test": "jest",
-    "build:example": "npm i && npm run build"
+    "build:example": "npm i && npm run build",
+    "release": "release-it"
   },
   "devDependencies": {
     "fast-check": "^2.19.0",
+    "release-it": "^14.11.8",
     "yjs": "^13.5.16"
   },
   "dependencies": {

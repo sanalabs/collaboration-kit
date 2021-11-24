@@ -12,13 +12,15 @@
     "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm",
-    "build:example": "npm i && npm run build"
+    "build:example": "npm i && npm run build",
+    "release": "release-it"
   },
   "devDependencies": {
     "@sanalabs/y-json": "file:../y-json",
     "@types/react": "^17.0.30",
     "react": "^17.0.2",
     "react-redux": "7.2.6",
+    "release-it": "^14.11.8",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.16"
   },

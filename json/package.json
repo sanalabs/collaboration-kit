@@ -11,9 +11,13 @@
   "scripts": {
     "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
-    "build": "npm run build:cjs && npm run build:esm"
+    "build": "npm run build:cjs && npm run build:esm",
+    "release": "release-it"
   },
   "dependencies": {
     "fast-json-patch": "^3.1.0"
+  },
+  "devDependencies": {
+    "release-it": "^14.11.8"
   }
 }
