@@ -13,7 +13,7 @@
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm",
     "build:example": "npm i && npm run build",
-    "release": "release-it"
+    "release": "release-it --config ../.release-it.json"
   },
   "devDependencies": {
     "@sanalabs/y-json": "file:../y-json",

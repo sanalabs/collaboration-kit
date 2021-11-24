@@ -12,7 +12,7 @@
     "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm",
-    "release": "release-it"
+    "release": "release-it --config ../.release-it.json"
   },
   "dependencies": {
     "fast-json-patch": "^3.1.0"
