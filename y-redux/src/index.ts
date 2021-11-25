@@ -29,7 +29,7 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   }, [])
 
   useEffect(() => {
-    console.debug('[SyncYMap] store changed', store)
+    console.debug('[SyncYMap] store changed')
   }, [store])
 
   // The origin of the yjs transactions committed by collaboration-kit
