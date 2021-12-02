@@ -18,13 +18,17 @@ export function patchYType(
   yTypeToMutate: Y.Map<unknown>,
   newState: JsonObject,
   options?: PatchYTypeOptions,
-): void
+): Y.Map<unknown>
 export function patchYType(
   yTypeToMutate: Y.Array<unknown>,
   newState: JsonArray,
   options?: PatchYTypeOptions,
-): void
-export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTypeOptions = {}): void {
+): Y.Array<unknown>
+export function patchYType(
+  yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
+  newState: JsonObject | JsonArray,
+  options: PatchYTypeOptions = {},
+): Y.Map<unknown> | Y.Array<unknown> {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
 
   const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
@@ -36,7 +40,7 @@ export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTyp
 
   const oldState: unknown = yTypeToMutate.toJSON()
   const delta = patchDiffJsonExtensions.diff(oldState, newState)
-  if (delta === undefined || _.isEqual(oldState, newState)) return
+  if (delta === undefined || _.isEqual(oldState, newState)) return yTypeToMutate
 
   transact(
     yTypeToMutate,
@@ -55,4 +59,6 @@ export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTyp
     },
     options.origin ?? null,
   )
+
+  return yTypeToMutate
 }
