@@ -1,4 +1,5 @@
 import * as fc from 'fast-check'
+import * as Y from 'yjs'
 import { deepPatchJson } from '../../json/src'
 import { patchYType } from '../src/patch-y-type'
 import * as utils from './utils'
@@ -126,5 +127,12 @@ describe('patchYType tests', () => {
     })
     patchYType(yMap, { state: '1' }, { origin: 'test' })
     expect(yMap.toJSON()).toEqual({ state: '2' })
+  })
+
+  it('is possibl to patch standalone Y.Map', () => {
+    const yMap = new Y.Map()
+    const target = { a: 'b' }
+    patchYType(yMap, target)
+    expect(yMap.toJSON()).toEqual(target)
   })
 })
