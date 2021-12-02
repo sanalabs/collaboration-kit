@@ -72,10 +72,8 @@ export const SyncYMap = <T extends JsonObject, RootState>({
     [store, selectData, yMap, origin],
   )
 
-  useEffect(() => {
-    // Send changes whenever our local data changes
-    throttledSendChanges()
-  }, [localData])
+  // Send changes whenever our local data changes
+  useEffect(throttledSendChanges, [localData])
 
   useEffect(() => () => throttledSendChanges.flush(), [])
 
