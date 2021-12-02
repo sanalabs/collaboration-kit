@@ -94,10 +94,7 @@ export const SyncYMap = <T extends JsonObject, RootState>({
     }
 
     const throttledObserver = _.throttle(observer, ThrottleReceiveMs)
-
-    yMap.observeDeep((e, t) => {
-      throttledObserver(e, t)
-    })
+    yMap.observeDeep(throttledObserver)
 
     return () => {
       throttledObserver.flush()
