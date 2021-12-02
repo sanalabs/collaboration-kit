@@ -133,11 +133,9 @@ export function diff(
       if (newValueMatchesLcsValue && !oldValueMatchesLcsValue) {
         result[`_${oldIdx}`] = [oldState[oldIdx], 0, 0]
         oldIdx++
-        continue
       } else if (oldValueMatchesLcsValue && !newValueMatchesLcsValue) {
         result[newIdx] = [newState[newIdx]]
         newIdx++
-        continue
       } else {
         if (oldValue !== newValue) {
           const areValuesSameType =
@@ -162,10 +160,8 @@ export function diff(
   if (Array.isArray(newState)) {
     throw new Error('Expected new state not to be an Array because old state is not an array')
   }
-  const newKeys = Object.keys(newState)
-  const oldKeys = Object.keys(oldState)
   const result: ObjectDelta = {}
-  for (const key of oldKeys) {
+  for (const key in oldState) {
     const oldVal = oldState[key]
     const newVal = newState[key]
     if (newVal === undefined) {
@@ -183,7 +179,7 @@ export function diff(
       result[key] = [oldVal, newVal]
     }
   }
-  for (const key of newKeys) {
+  for (const key in newState) {
     const oldVal = oldState[key]
     const newVal = newState[key]
     if (oldVal === undefined) {

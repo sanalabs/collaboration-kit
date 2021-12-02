@@ -6,7 +6,7 @@ interface DpState {
 }
 
 interface DpValue {
-  value: number
+  lcs: number
   predecessor: DpState | undefined
 }
 
@@ -19,7 +19,7 @@ export function longestCommonSubsequence(
     return aIdx * (b.length + 1) + bIdx
   }
   const dp: Map<number, DpValue> = new Map()
-  dp.set(toMapInd(0, 0), { value: 0, predecessor: undefined })
+  dp.set(toMapInd(0, 0), { lcs: 0, predecessor: undefined })
 
   let current: DpState[] = [{ aIdx: 0, bIdx: 0 }]
   let next: DpState[] = []
@@ -34,9 +34,9 @@ export function longestCommonSubsequence(
     const aIdx = state.aIdx
     const bIdx = state.bIdx
     const mapInd = toMapInd(aIdx, bIdx)
-    const oldValue = dp.get(mapInd)?.value
+    const oldValue = dp.get(mapInd)?.lcs
     if (oldValue === undefined || value > oldValue) {
-      dp.set(mapInd, { value: value, predecessor: previousState })
+      dp.set(mapInd, { lcs: value, predecessor: previousState })
       const bestPossible = value + Math.min(a.length - aIdx, b.length - bIdx)
       if (bestPossible >= currentTarget) {
         current.push(state)
@@ -50,7 +50,7 @@ export function longestCommonSubsequence(
     for (const currentPos of current) {
       const aIdx = currentPos.aIdx
       const bIdx = currentPos.bIdx
-      const currentDpValue = dp.get(toMapInd(aIdx, bIdx))?.value
+      const currentDpValue = dp.get(toMapInd(aIdx, bIdx))?.lcs
       if (currentDpValue === undefined) {
         throw new Error('Dp value is undefined')
       }
@@ -70,8 +70,9 @@ export function longestCommonSubsequence(
   }
 
   const lcs: unknown[] = []
-  let state = dp.get(toMapInd(a.length, b.length))?.predecessor
-  while (state !== undefined) {
+  let state = { aIdx: a.length, bIdx: b.length }
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+  while (true) {
     const previousState = dp.get(toMapInd(state.aIdx, state.bIdx))?.predecessor
     if (previousState === undefined) {
       break
