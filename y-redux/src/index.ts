@@ -12,9 +12,6 @@ export type BaseAwarenessState = {
   isCurrentClient: boolean
 }
 
-const ThrottleReceiveMs = 100
-const ThrottleSendMs = 100
-
 function sendChanges<T extends JsonObject, RootState>(
   store: Store,
   selectData: (state: RootState) => T | undefined,
@@ -46,10 +43,14 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   yMap,
   setData,
   selectData,
+  throttleReceiveMs = 200,
+  throttleSendMs = 200,
 }: {
   yMap: Y.Map<T>
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
+  throttleReceiveMs?: number
+  throttleSendMs?: number
 }): null => {
   const dispatch = useDispatch()
   const localData = useSelector(selectData)
@@ -68,8 +69,8 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   const [origin] = useState<string>(() => `collaboration-kit:sync:${Math.random()}`)
 
   const throttledSendChanges = useMemo(
-    () => _.throttle(sendChanges(store, selectData, yMap, { origin }), ThrottleSendMs),
-    [store, selectData, yMap, origin],
+    () => _.throttle(sendChanges(store, selectData, yMap, { origin }), throttleSendMs),
+    [store, selectData, yMap, origin, throttleSendMs],
   )
 
   // Send changes whenever our local data changes
@@ -93,14 +94,14 @@ export const SyncYMap = <T extends JsonObject, RootState>({
       dispatch(setData(newData))
     }
 
-    const throttledObserver = _.throttle(observer, ThrottleReceiveMs)
+    const throttledObserver = _.throttle(observer, throttleReceiveMs)
     yMap.observeDeep(throttledObserver)
 
     return () => {
       throttledObserver.flush()
       yMap.unobserveDeep(throttledObserver)
     }
-  }, [yMap, dispatch, setData, store, origin])
+  }, [yMap, dispatch, setData, store, origin, throttleReceiveMs])
 
   return null
 }
