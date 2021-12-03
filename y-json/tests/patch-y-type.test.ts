@@ -49,7 +49,7 @@ describe('patchYType tests', () => {
         patchYType(yMap, secondState)
         expect(yMap.toJSON()).toEqual(secondState)
       }),
-      { numRuns: 1000 },
+      { numRuns: 10000 },
     )
   })
 
@@ -87,6 +87,21 @@ describe('patchYType tests', () => {
       }),
       { numRuns: 1000 },
     )
+  })
+
+  it('handles yarray substitutions efficiently', () => {
+    const arrayLength = 10000
+    const iterations = 100
+    const state: number[] = []
+    for (let i = 0; i < arrayLength; i++) {
+      state.push(i)
+    }
+    const yArray = utils.makeYArray()
+    for (let i = 0; i < iterations; i++) {
+      state[Math.floor(Math.random() * arrayLength)] = Math.random()
+      patchYType(yArray, state)
+      expect(yArray.toJSON()).toEqual(state)
+    }
   })
 
   it('patchYType and deepPatchJson work the same way', () => {

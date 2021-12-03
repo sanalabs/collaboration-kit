@@ -3,7 +3,7 @@ import * as Y from 'yjs'
 import { isPlainArray, isPlainObject, JsonArray, JsonObject } from '../../../json/src'
 import { assertIsYMapOrArray, isYArray, isYMap } from '../assertions'
 import { transact } from '../y-utils'
-import * as patchDiffJsonExtensions from './patch-diff-json-extensions'
+import * as patchDiffJson from './patch-diff-json'
 
 type PatchYTypeOptions = {
   // The origin of the yjs transaction.
@@ -35,13 +35,16 @@ export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTyp
   }
 
   const oldState: unknown = yTypeToMutate.toJSON()
-  const delta = patchDiffJsonExtensions.diff(oldState, newState)
+  if (!isPlainArray(oldState) && !isPlainObject(oldState)) {
+    throw new Error('Expected old state to be either an Array or an object')
+  }
+  const delta = patchDiffJson.diff(oldState, newState)
   if (delta === undefined || _.isEqual(oldState, newState)) return
 
   transact(
     yTypeToMutate,
     () => {
-      patchDiffJsonExtensions.patch(yTypeToMutate, delta)
+      patchDiffJson.patch(yTypeToMutate, delta)
 
       // Verify that the patch was successful
       // This needs to be run inside the transaction, otherwise it is possible that
