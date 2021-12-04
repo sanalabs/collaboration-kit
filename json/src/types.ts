@@ -14,6 +14,8 @@ export type JsonTemplateArray = JsonTemplate[]
 export type JsonTemplateContainer = JsonTemplateObject | JsonTemplateArray
 export type JsonTemplate = JsonTemplatePrimitive | JsonTemplateContainer
 
+export type JsonTemplateObjectDeep = { [key: string]: JsonTemplatePrimitive | JsonTemplateObjectDeep }
+
 /**
  * The value `undefined` is not a valid JSON type, but since JS/TS is inconsistent with how undefined is
  * treated, this library allows `undefined` as an input value and treats it as a delete operation. The value

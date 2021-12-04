@@ -7,6 +7,7 @@ import {
   JsonArray,
   JsonObject,
   JsonPrimitive,
+  JsonTemplatePrimitive,
 } from '.'
 import { mkErr } from './error'
 
@@ -41,5 +42,26 @@ export function assertIsJson(val: unknown): asserts val is Json {
     assertIsJsonArray(val)
   } else {
     assertIsJsonPrimitive(val)
+  }
+}
+
+export function isJsonTemplatePrimitive(val: unknown): val is JsonTemplatePrimitive {
+  if (isJsonPrimitive(val)) return true
+  if (val === undefined) return true
+  return false
+}
+
+export function assertIsJsonTemplatePrimitive(val: unknown): asserts val is JsonTemplatePrimitive {
+  if (!isJsonTemplatePrimitive(val))
+    throw mkErr(val, 'JSON template primitive (string | number | boolean | null | undefined)')
+}
+
+export function assertIsJsonTemplate(val: unknown): asserts val is Json {
+  if (isPlainObject(val)) {
+    Object.values(val).forEach(assertIsJsonTemplate)
+  } else if (isPlainArray(val)) {
+    val.forEach(assertIsJsonTemplate)
+  } else {
+    assertIsJsonTemplatePrimitive(val)
   }
 }
