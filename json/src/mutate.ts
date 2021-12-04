@@ -8,7 +8,8 @@ import {
   JsonArray,
   JsonContainer,
   JsonObject,
-  JsonPrimitive,
+  JsonTemplateObject,
+  JsonTemplatePrimitive,
 } from './'
 import { mkErr } from './error'
 
@@ -31,12 +32,6 @@ const keyExists = (obj: any, path: string): boolean => {
 
   return true
 }
-
-type JsonTemplatePrimitive = JsonPrimitive | undefined
-type JsonTemplateObject = { [key: string]: JsonTemplate }
-type JsonTemplateArray = JsonTemplate[]
-type JsonTemplateContainer = JsonTemplateObject | JsonTemplateArray
-type JsonTemplate = JsonTemplatePrimitive | JsonTemplateContainer
 
 function isJsonTemplatePrimitive(val: unknown): val is JsonTemplatePrimitive {
   if (isJsonPrimitive(val)) return true

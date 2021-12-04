@@ -2,6 +2,7 @@
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.wordWrapColumn": 110,
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   },

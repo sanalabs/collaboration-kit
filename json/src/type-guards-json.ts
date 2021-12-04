@@ -1,11 +1,14 @@
-import { assertIsPlainArray, assertIsPlainObject, isPlainArray, isPlainObject } from '.'
+import {
+  assertIsPlainArray,
+  assertIsPlainObject,
+  isPlainArray,
+  isPlainObject,
+  Json,
+  JsonArray,
+  JsonObject,
+  JsonPrimitive,
+} from '.'
 import { mkErr } from './error'
-
-export type JsonPrimitive = string | number | boolean | null
-export type JsonObject = { [key: string]: Json }
-export type JsonArray = Json[]
-export type JsonContainer = JsonObject | JsonArray
-export type Json = JsonPrimitive | JsonContainer
 
 export function isJsonPrimitive(val: unknown): val is JsonPrimitive {
   if (typeof val === 'string') return true
