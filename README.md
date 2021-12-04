@@ -7,35 +7,7 @@ Monorepo for packages that facilitate working with arbitrary JSON structures in 
 - `@sanalabs/y-json` Utility functions to mutate Yjs types according to a target JSON object
 - `@sanalabs/json` Utility functions to validate and mutate JSON (patch and merge)
 
-## Principles
-
-### Strict typing (compile-time) and validation (run-time)
-
-- Typed with TypeScript
-- Assertions in runtime to guarantee that no corrupt data gets propagated
-
-### Prohibit `undefined`
-
-`undefined` is not a valid JSON type. However, a property with the value `undefined` in JavaScript is in some contexts considered equivalent to that property not existing. For example:
-
-```js
-JSON.stringify({ prop: undefined }) === JSON.stringify({}) // '{}'
-```
-
-But not always:
-
-```js
-JSON.stringify([undefined]) === JSON.stringify([null]) // What!?
-```
-
-It's actually quite confusing:
-
-```js
-const obj = { a: undefined }
-obj.a === obj.b // true
-```
-
-To increase the strictness and predictability of the code, Collaboration Kit strictly prohibits undefined to be passed around. This is achieved through runtime assertions, see [`json`](https://github.com/sanalabs/collaboration-kit/tree/main/json). If you like this, you may be interested in the typescript compiler option [`exactOptionalPropertyTypes`](https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes).
+## Notes
 
 ### No excessive package dependencies
 

@@ -1,4 +1,3 @@
-import { patchYType } from '@sanalabs/y-json'
 import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector, useStore } from 'react-redux'
@@ -6,6 +5,7 @@ import { Store } from 'redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 import { JsonObject } from '../../json/src'
+import { patchYType } from '../../y-json/src'
 
 export type BaseAwarenessState = {
   clientId: number
@@ -15,7 +15,7 @@ export type BaseAwarenessState = {
 function sendChanges<T extends JsonObject, RootState>(
   store: Store,
   selectData: (state: RootState) => T | undefined,
-  yMap: Y.Map<T>,
+  yMap: Y.Map<unknown>,
   origin: { origin: string },
 ) {
   return () => {
@@ -39,6 +39,7 @@ function sendChanges<T extends JsonObject, RootState>(
     patchYType(yMap, latestRedux, { origin })
   }
 }
+
 export const SyncYMap = <T extends JsonObject, RootState>({
   yMap,
   setData,
@@ -46,7 +47,7 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   throttleReceiveMs = 200,
   throttleSendMs = 200,
 }: {
-  yMap: Y.Map<T>
+  yMap: Y.Map<unknown>
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
   throttleReceiveMs?: number

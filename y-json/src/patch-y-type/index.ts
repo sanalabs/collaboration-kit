@@ -1,6 +1,12 @@
 import _ from 'lodash'
 import * as Y from 'yjs'
-import { isPlainArray, isPlainObject, JsonArray, JsonObject } from '../../../json/src'
+import {
+  deepNormalizeJson,
+  isPlainArray,
+  isPlainObject,
+  JsonTemplateArray,
+  JsonTemplateObject,
+} from '../../../json/src'
 import { assertIsYMapOrArray, isYArray, isYMap } from '../assertions'
 import { transact } from '../y-utils'
 import * as patchDiffJson from './patch-diff-json'
@@ -16,16 +22,21 @@ type PatchYTypeOptions = {
  */
 export function patchYType(
   yTypeToMutate: Y.Map<unknown>,
-  newState: JsonObject,
+  newState: JsonTemplateObject,
   options?: PatchYTypeOptions,
 ): void
 export function patchYType(
   yTypeToMutate: Y.Array<unknown>,
-  newState: JsonArray,
+  newState: JsonTemplateArray,
   options?: PatchYTypeOptions,
 ): void
-export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTypeOptions = {}): void {
+export function patchYType(
+  yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
+  newState: JsonTemplateObject | JsonTemplateArray,
+  options: PatchYTypeOptions = {},
+): void {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
+  deepNormalizeJson(newState)
 
   const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
   const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
