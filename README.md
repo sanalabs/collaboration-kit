@@ -40,9 +40,12 @@ export const SyncData = () => {
     return { yMap, yProvider }
   }, [])
 
-  useEffect(() => () => {
-    yProvider.destroy()
-  }, [yProvider])
+  useEffect(
+    () => () => {
+      yProvider.destroy()
+    },
+    [yProvider],
+  )
 
   return (
     <SyncYMap

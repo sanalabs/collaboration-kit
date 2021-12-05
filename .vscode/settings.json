@@ -8,5 +8,8 @@
   },
   "search.exclude": {
     "**/node_modules": true
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
