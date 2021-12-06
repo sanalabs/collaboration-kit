@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { Store } from 'redux'
+import { AnyAction, Store } from 'redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 import { JsonObject } from '../../json/src'
@@ -107,20 +107,13 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   return null
 }
 
-export const SyncYAwareness = <T extends JsonObject>({
-  awareness,
-  setAwarenessStates,
-  selectLocalAwarenessState,
-}: {
-  awareness: Awareness
-  setAwarenessStates: (awarenessStates: (BaseAwarenessState & T)[]) => void
-  selectLocalAwarenessState: (state: any) => T | undefined
-}): null => {
-  const dispatch = useDispatch()
-  const localAwarenessState = useSelector(selectLocalAwarenessState)
-  const store = useStore()
-
-  useEffect(() => {
+function sendLocalAwarenessState<T extends JsonObject>(
+  awareness: Awareness,
+  selectLocalAwarenessState: (state: any) => T | undefined,
+  store: Store<any, AnyAction>,
+  localAwarenessState: T | undefined,
+) {
+  return () => {
     const latestReduxAwareness = selectLocalAwarenessState(store.getState())
     if (latestReduxAwareness === undefined) return
     if (!_.isEqual(latestReduxAwareness, localAwarenessState)) {
@@ -129,7 +122,39 @@ export const SyncYAwareness = <T extends JsonObject>({
       )
     }
     awareness.setLocalState(latestReduxAwareness)
-  }, [awareness, localAwarenessState, store, selectLocalAwarenessState])
+  }
+}
+
+export const SyncYAwareness = <T extends JsonObject>({
+  awareness,
+  setAwarenessStates,
+  selectLocalAwarenessState,
+  throttleReceiveMs = 200,
+  throttleSendMs = 200,
+}: {
+  awareness: Awareness
+  setAwarenessStates: (awarenessStates: (BaseAwarenessState & T)[]) => void
+  selectLocalAwarenessState: (state: any) => T | undefined
+  throttleReceiveMs?: number
+  throttleSendMs?: number
+}): null => {
+  const dispatch = useDispatch()
+  const localAwarenessState = useSelector(selectLocalAwarenessState)
+  const store = useStore()
+
+  const throttledSendChanges = useMemo(
+    () =>
+      _.throttle(
+        sendLocalAwarenessState(awareness, selectLocalAwarenessState, store, localAwarenessState),
+        throttleSendMs,
+      ),
+    [awareness, selectLocalAwarenessState, store, localAwarenessState, throttleSendMs],
+  )
+
+  // Send changes whenever our local data changes
+  useEffect(throttledSendChanges, [localAwarenessState])
+
+  useEffect(() => () => throttledSendChanges.flush(), [])
 
   useEffect(() => {
     const handler = (): void => {
@@ -151,9 +176,10 @@ export const SyncYAwareness = <T extends JsonObject>({
 
     handler()
 
-    awareness.on('change', handler)
+    const throttledHandler = _.throttle(handler, throttleReceiveMs)
+    awareness.on('change', throttledHandler)
 
-    return () => awareness.off('change', handler)
+    return () => awareness.off('change', throttledHandler)
   }, [awareness, dispatch, setAwarenessStates])
 
   return null
