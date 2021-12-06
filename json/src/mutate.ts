@@ -7,6 +7,7 @@ import {
 } from './'
 import {
   Delta,
+  DeltaType,
   diff,
   isArrayNestedDelta,
   isObjectNestedDelta,
@@ -16,39 +17,26 @@ import {
 } from './diff-json'
 import { deepNormalizeJson } from './normalize-json'
 
-function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
-  if (val === undefined) throw new Error()
-  if (val === null) throw new Error()
-}
-
-const keyExists = (obj: any, path: string): boolean => {
-  const keys = path.split('/')
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  let curr = obj
-  for (let i = 1; i < keys.length; i++) {
-    const key = keys[i]
-    assertIsDefined(key)
-    if (!(key in curr)) return false
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    curr = curr[key]
-  }
-
-  return true
-}
-
 type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> | undefined }
 
-function removeDeltaDeletions(delta: Delta): void {
+function removeDeletionDeltas(delta: Delta): Delta {
   const operations: Operation[] = []
   for (const operation of delta.operations) {
     if (operation.operationType !== OperationType.Deletion) {
       if (isArrayNestedDelta(operation) || isObjectNestedDelta(operation)) {
-        removeDeltaDeletions(operation.delta)
+        removeDeletionDeltas(operation.delta)
       }
       operations.push(operation)
     }
   }
+  if (operations.length === 0) {
+    return {
+      type: DeltaType.NoDifference,
+      operations: [],
+    }
+  }
   delta.operations = operations
+  return delta
 }
 
 // After application, objectToMutate will contain everything in newState.
@@ -61,8 +49,8 @@ export function deepMergeJson<T extends JsonTemplateObjectDeep>(
 ): void {
   assertIsJsonTemplate(objectToMutate)
   assertIsJsonTemplate(newState)
-  const delta = diff(objectToMutate, newState)
-  removeDeltaDeletions(delta)
+  let delta = diff(objectToMutate, newState)
+  delta = removeDeletionDeltas(delta)
   patch(objectToMutate, delta)
   deepNormalizeJson(objectToMutate)
 }

@@ -22,7 +22,7 @@ export interface Delta {
   operations: Operation[]
 }
 
-enum DeltaType {
+export enum DeltaType {
   Array = 'array',
   Object = 'object',
   NoDifference = 'no-diff',
@@ -149,7 +149,7 @@ function diffArrays(
   oldState: unknown[],
   newState: unknown[],
   objectHashes: Map<object | number | string | boolean, number>,
-): Delta {
+): ArrayDelta | NoDelta {
   const lcs = longestCommonSubsequence(oldState, newState, objectHashes)
   const deletionOperations: ArrayDeletion[] = []
   const insertionOperations: ArrayInsertion[] = []
@@ -237,24 +237,22 @@ function diffArrays(
     ...nestedOperations,
   ]
   if (operations.length === 0) {
-    const delta: NoDelta = {
+    return {
       type: DeltaType.NoDifference,
       operations: [],
     }
-    return delta
   }
-  const delta: ArrayDelta = {
+  return {
     type: DeltaType.Array,
     operations,
   }
-  return delta
 }
 
 function diffObjects(
   oldState: Record<string, unknown>,
   newState: Record<string, unknown>,
   objectHashes: Map<object | number | string | boolean, number>,
-): Delta {
+): ObjectDelta | NoDelta {
   const operations: ObjectOperation[] = []
   for (const key in oldState) {
     const oldVal = oldState[key]
@@ -302,17 +300,15 @@ function diffObjects(
     }
   }
   if (operations.length === 0) {
-    const delta: NoDelta = {
+    return {
       type: DeltaType.NoDifference,
       operations: [],
     }
-    return delta
   }
-  const delta: ObjectDelta = {
+  return {
     type: DeltaType.Object,
     operations,
   }
-  return delta
 }
 
 export function diff(
@@ -320,13 +316,11 @@ export function diff(
   newState: unknown[] | Record<string, unknown>,
   objectHashes?: Map<object | number | string | boolean, number>,
 ): Delta {
-  // console.log(`Calling diff(${JSON.stringify(oldState)}, ${JSON.stringify(newState)})`)
   if (newState === oldState) {
-    const delta: NoDelta = {
+    return {
       type: DeltaType.NoDifference,
       operations: [],
     }
-    return delta
   }
   if (objectHashes === undefined) {
     objectHashes = new Map()
@@ -344,7 +338,6 @@ export function diff(
 }
 
 export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delta): void {
-  // console.log(`Calling patch(${JSON.stringify(yType)}, ${JSON.stringify(delta)})`)
   if (isArrayDelta(delta)) {
     if (!isPlainArray(oldState)) {
       throw new Error('Expected old state to be an Array')
@@ -371,7 +364,6 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
     }
 
     for (const operation of delta.operations) {
-      // console.log('operation: ', JSON.stringify(operation))
       if (isObjectDeletion(operation)) {
         delete oldState[operation.key]
       } else if (isObjectInsertion(operation)) {
@@ -386,8 +378,7 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         patch(inner, operation.delta)
       }
     }
-    // console.log('Applied all operations')
   } else if (!isNoDelta(delta)) {
-    throw new Error('Expected delta to be either an array delta or an object delta.')
+    throw new Error('Expected delta to be an array delta, an object delta or no delta.')
   }
 }

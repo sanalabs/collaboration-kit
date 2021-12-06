@@ -35,11 +35,28 @@ describe('test merge', () => {
     expect(source).toStrictEqual({ deep: { a: 11, c: 3 } })
   })
 
-  it('handles array', () => {
-    const source = { a: [1, 2] }
-    const target = { a: [2] }
-    deepPatchJson(source, target)
-    expect(source).toStrictEqual({ a: [2] })
+  it('does nothing when there is no diff', () => {
+    const source = { deep: { a: 1 } }
+    const target = { deep: { a: 1 } }
+
+    const sourceRefBefore = source.deep
+    deepMergeJson(source, target)
+    const sourceRefAfter = source.deep
+
+    expect(source).toStrictEqual({ deep: { a: 1 } })
+    expect(sourceRefBefore).toBe(sourceRefAfter)
+  })
+
+  it('does nothing when target is empty', () => {
+    const source = { deep: { a: 1 } }
+    const target = {}
+
+    const sourceRefBefore = source.deep
+    deepMergeJson(source, target)
+    const sourceRefAfter = source.deep
+
+    expect(source).toStrictEqual({ deep: { a: 1 } })
+    expect(sourceRefBefore).toBe(sourceRefAfter)
   })
 })
 

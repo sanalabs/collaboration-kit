@@ -40,7 +40,6 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
     assertIsYMap(yType)
 
     for (const operation of delta.operations) {
-      // console.log('operation: ', JSON.stringify(operation))
       if (isObjectDeletion(operation)) {
         yType.delete(operation.key)
       } else if (isObjectInsertion(operation)) {
