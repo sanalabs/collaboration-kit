@@ -2,10 +2,14 @@
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.wordWrapColumn": 110,
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   },
   "search.exclude": {
     "**/node_modules": true
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

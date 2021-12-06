@@ -16,7 +16,6 @@ import { assertIsYArray, assertIsYMap, assertIsYMapOrArray } from '../assertions
 import { unknownToYTypeOrPrimitive } from '../y-utils'
 
 export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, delta: Delta): void {
-  // console.log(`Calling patch(${JSON.stringify(yType)}, ${JSON.stringify(delta)})`)
   if (isArrayDelta(delta)) {
     assertIsYArray(yType)
 
@@ -38,9 +37,7 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
       }
     }
   } else if (isObjectDelta(delta)) {
-    // console.log('isObjectDelta')
     assertIsYMap(yType)
-    // console.log('isYMap')
 
     for (const operation of delta.operations) {
       // console.log('operation: ', JSON.stringify(operation))
@@ -56,7 +53,6 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
         patch(innerYType, operation.delta)
       }
     }
-    // console.log('Applied all operations')
   } else {
     throw new Error('Expected delta to be either an array delta or an object delta.')
   }
