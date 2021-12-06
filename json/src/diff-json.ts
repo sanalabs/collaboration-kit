@@ -9,18 +9,49 @@ export enum OperationType {
   Nested = 'nested',
 }
 
-export interface Operation {
-  operationType: OperationType
+interface ArrayInsertion {
+  operationType: OperationType.Insertion
+  index: number
+  values: unknown[]
+}
+interface ArrayDeletion {
+  operationType: OperationType.Deletion
+  index: number
+  count: number
+}
+interface ArraySubstitution {
+  operationType: OperationType.Substitution
+  index: number
+  value: unknown
+}
+interface ArrayNestedDelta {
+  operationType: OperationType.Nested
+  index: number
+  delta: Delta
+}
+interface ObjectInsertion {
+  operationType: OperationType.Insertion
+  key: string
+  value: unknown
+}
+interface ObjectDeletion {
+  operationType: OperationType.Deletion
+  key: string
+}
+interface ObjectSubstitution {
+  operationType: OperationType.Substitution
+  key: string
+  value: unknown
+}
+interface ObjectNestedDelta {
+  operationType: OperationType.Nested
+  key: string
+  delta: Delta
 }
 
-interface ArrayOperation extends Operation {}
-
-interface ObjectOperation extends Operation {}
-
-export interface Delta {
-  type: string
-  operations: Operation[]
-}
+export type ArrayOperation = ArrayInsertion | ArrayDeletion | ArraySubstitution | ArrayNestedDelta
+export type ObjectOperation = ObjectInsertion | ObjectDeletion | ObjectSubstitution | ObjectNestedDelta
+export type Operation = ArrayOperation | ObjectOperation
 
 export enum DeltaType {
   Array = 'array',
@@ -28,81 +59,17 @@ export enum DeltaType {
   NoDifference = 'no-diff',
 }
 
-export interface ArrayDelta extends Delta {
+export interface ArrayDelta {
   type: DeltaType.Array
   operations: ArrayOperation[]
 }
 
-export interface ObjectDelta extends Delta {
+export interface ObjectDelta {
   type: DeltaType.Object
   operations: ObjectOperation[]
 }
 
-export interface NoDelta extends Delta {
-  type: DeltaType.NoDifference
-  operations: []
-}
-
-export const isArrayDelta = (d: Delta): d is ArrayDelta => d.type === DeltaType.Array
-export const isObjectDelta = (d: Delta): d is ObjectDelta => d.type === DeltaType.Object
-export const isNoDelta = (d: Delta): d is NoDelta => d.type === DeltaType.NoDifference
-
-interface ArrayInsertion extends ArrayOperation {
-  operationType: OperationType.Insertion
-  index: number
-  values: unknown[]
-}
-interface ArrayDeletion extends ArrayOperation {
-  operationType: OperationType.Deletion
-  index: number
-  count: number
-}
-interface ArraySubstitution extends ArrayOperation {
-  operationType: OperationType.Substitution
-  index: number
-  value: unknown
-}
-interface ArrayNestedDelta extends ArrayOperation {
-  operationType: OperationType.Nested
-  index: number
-  delta: Delta
-}
-interface ObjectInsertion extends ObjectOperation {
-  operationType: OperationType.Insertion
-  key: string
-  value: unknown
-}
-interface ObjectDeletion extends ObjectOperation {
-  operationType: OperationType.Deletion
-  key: string
-}
-interface ObjectSubstitution extends ObjectOperation {
-  operationType: OperationType.Substitution
-  key: string
-  value: unknown
-}
-interface ObjectNestedDelta extends ObjectOperation {
-  operationType: OperationType.Nested
-  key: string
-  delta: Delta
-}
-
-export const isArrayInsertion = (d: ArrayOperation): d is ArrayInsertion =>
-  d.operationType === OperationType.Insertion
-export const isArrayDeletion = (d: Operation): d is ArrayDeletion =>
-  d.operationType === OperationType.Deletion
-export const isArraySubstitution = (d: ArrayOperation): d is ArraySubstitution =>
-  d.operationType === OperationType.Substitution
-export const isArrayNestedDelta = (d: ArrayOperation): d is ArrayNestedDelta =>
-  d.operationType === OperationType.Nested
-export const isObjectInsertion = (d: ObjectOperation): d is ObjectInsertion =>
-  d.operationType === OperationType.Insertion
-export const isObjectDeletion = (d: Operation): d is ObjectDeletion =>
-  d.operationType === OperationType.Deletion
-export const isObjectSubstitution = (d: ObjectOperation): d is ObjectSubstitution =>
-  d.operationType === OperationType.Substitution
-export const isObjectNestedDelta = (d: ObjectOperation): d is ObjectNestedDelta =>
-  d.operationType === OperationType.Nested
+export type Delta = ArrayDelta | ObjectDelta
 
 function compressInsertionOperations(insertionOperations: ArrayInsertion[]): ArrayInsertion[] {
   const compressedInsertionOperations: ArrayInsertion[] = []
@@ -150,7 +117,7 @@ function diffArrays(
   oldState: unknown[],
   newState: unknown[],
   objectHashes: Map<object | number | string | boolean, number>,
-): ArrayDelta | NoDelta {
+): ArrayDelta {
   const lcs = longestCommonSubsequence(oldState, newState, objectHashes)
   const deletionOperations: ArrayDeletion[] = []
   const insertionOperations: ArrayInsertion[] = []
@@ -162,20 +129,18 @@ function diffArrays(
     lcsIdx = 0
   while (oldIdx < oldState.length || newIdx < newState.length) {
     if (oldIdx === oldState.length) {
-      const operation: ArrayInsertion = {
+      insertionOperations.push({
         operationType: OperationType.Insertion,
         index: newIdx,
         values: newState.slice(newIdx),
-      }
-      insertionOperations.push(operation)
+      })
       break
     } else if (newIdx === newState.length) {
-      const operation: ArrayDeletion = {
+      deletionOperations.push({
         operationType: OperationType.Deletion,
         index: oldIdx,
         count: oldState.length - oldIdx,
-      }
-      deletionOperations.push(operation)
+      })
       break
     }
     const oldValue = oldState[oldIdx]
@@ -184,20 +149,18 @@ function diffArrays(
     const oldValueMatchesLcsValue = hash(oldValue, objectHashes) === lcsHash
     const newValueMatchesLcsValue = hash(newValue, objectHashes) === lcsHash
     if (newValueMatchesLcsValue && !oldValueMatchesLcsValue) {
-      const operation: ArrayDeletion = {
+      deletionOperations.push({
         operationType: OperationType.Deletion,
         index: oldIdx,
         count: 1,
-      }
-      deletionOperations.push(operation)
+      })
       oldIdx++
     } else if (oldValueMatchesLcsValue && !newValueMatchesLcsValue) {
-      const operation: ArrayInsertion = {
+      insertionOperations.push({
         operationType: OperationType.Insertion,
         index: newIdx,
         values: [newState[newIdx]],
-      }
-      insertionOperations.push(operation)
+      })
       newIdx++
     } else {
       if (oldValue !== newValue) {
@@ -208,21 +171,19 @@ function diffArrays(
         const isNewValueDiffable = isPlainArray(newValue) || isPlainObject(newValue)
         if (areValuesSameType && isOldValueDiffable && isNewValueDiffable) {
           const childDiff = diff(oldValue, newValue, objectHashes)
-          if (!isNoDelta(childDiff)) {
-            const operation: ArrayNestedDelta = {
+          if (childDiff.operations.length > 0) {
+            nestedOperations.push({
               operationType: OperationType.Nested,
               index: newIdx,
               delta: childDiff,
-            }
-            nestedOperations.push(operation)
+            })
           }
         } else {
-          const operation: ArraySubstitution = {
+          substitutionOperations.push({
             operationType: OperationType.Substitution,
             index: newIdx,
             value: newValue,
-          }
-          substitutionOperations.push(operation)
+          })
         }
       }
       oldIdx++
@@ -237,12 +198,6 @@ function diffArrays(
     ...substitutionOperations,
     ...nestedOperations,
   ]
-  if (operations.length === 0) {
-    return {
-      type: DeltaType.NoDifference,
-      operations: [],
-    }
-  }
   return {
     type: DeltaType.Array,
     operations,
@@ -253,16 +208,15 @@ function diffObjects(
   oldState: Record<string, unknown>,
   newState: Record<string, unknown>,
   objectHashes: Map<object | number | string | boolean, number>,
-): ObjectDelta | NoDelta {
+): ObjectDelta {
   const operations: ObjectOperation[] = []
   for (const key in oldState) {
     const oldVal = oldState[key]
     if (!(key in newState)) {
-      const operation: ObjectDeletion = {
+      operations.push({
         operationType: OperationType.Deletion,
         key,
-      }
-      operations.push(operation)
+      })
       continue
     }
     const newVal = newState[key]
@@ -272,38 +226,29 @@ function diffObjects(
     const isNewValDiffable = isPlainArray(newVal) || isPlainObject(newVal)
     if (areValuesSameType && isOldValDiffable && isNewValDiffable) {
       const childDiff = diff(oldVal, newVal, objectHashes)
-      if (!isNoDelta(childDiff)) {
-        const operation: ObjectNestedDelta = {
+      if (childDiff.operations.length > 0) {
+        operations.push({
           operationType: OperationType.Nested,
           key,
           delta: childDiff,
-        }
-        operations.push(operation)
+        })
       }
     } else {
-      const operation: ObjectSubstitution = {
+      operations.push({
         operationType: OperationType.Substitution,
         key,
         value: newVal,
-      }
-      operations.push(operation)
+      })
     }
   }
   for (const key in newState) {
     const newVal = newState[key]
     if (!(key in oldState)) {
-      const operation: ObjectInsertion = {
+      operations.push({
         operationType: OperationType.Insertion,
         key,
         value: newVal,
-      }
-      operations.push(operation)
-    }
-  }
-  if (operations.length === 0) {
-    return {
-      type: DeltaType.NoDifference,
-      operations: [],
+      })
     }
   }
   return {
@@ -319,7 +264,7 @@ export function diff(
 ): Delta {
   if (newState === oldState) {
     return {
-      type: DeltaType.NoDifference,
+      type: isPlainArray(oldState) ? DeltaType.Array : DeltaType.Object,
       operations: [],
     }
   }
@@ -339,19 +284,19 @@ export function diff(
 }
 
 export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delta): void {
-  if (isArrayDelta(delta)) {
+  if (delta.type === DeltaType.Array) {
     if (!isPlainArray(oldState)) {
       throw new Error('Expected old state to be an Array')
     }
 
     for (const operation of delta.operations) {
-      if (isArrayDeletion(operation)) {
+      if (operation.operationType === OperationType.Deletion) {
         oldState.splice(operation.index, operation.count)
-      } else if (isArrayInsertion(operation)) {
+      } else if (operation.operationType === OperationType.Insertion) {
         oldState.splice(operation.index, 0, operation.values)
-      } else if (isArraySubstitution(operation)) {
+      } else if (operation.operationType === OperationType.Substitution) {
         oldState.splice(operation.index, 1, operation.value)
-      } else if (isArrayNestedDelta(operation)) {
+      } else if (operation.operationType === OperationType.Nested) {
         const inner = oldState[operation.index]
         if (!isPlainArray(inner) && !isPlainObject(inner)) {
           throw new Error('Expected old state to be either an Array or an object')
@@ -359,17 +304,20 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         patch(inner, operation.delta)
       }
     }
-  } else if (isObjectDelta(delta)) {
+  } else if (delta.type === DeltaType.Object) {
     if (!isPlainObject(oldState)) {
       throw new Error('Expected old state to be a plain object')
     }
 
     for (const operation of delta.operations) {
-      if (isObjectDeletion(operation)) {
+      if (operation.operationType === OperationType.Deletion) {
         delete oldState[operation.key]
-      } else if (isObjectSubstitution(operation) || isObjectInsertion(operation)) {
+      } else if (
+        operation.operationType === OperationType.Substitution ||
+        operation.operationType === OperationType.Insertion
+      ) {
         oldState[operation.key] = operation.value
-      } else if (isObjectNestedDelta(operation)) {
+      } else if (operation.operationType === OperationType.Nested) {
         const inner = oldState[operation.key]
         if (!isPlainArray(inner) && !isPlainObject(inner)) {
           throw new Error('Expected old state to be either an Array or an object')
@@ -377,7 +325,7 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         patch(inner, operation.delta)
       }
     }
-  } else if (!isNoDelta(delta)) {
-    throw new Error('Expected delta to be an array delta, an object delta or no delta.')
+  } else {
+    throw new Error('Expected delta to be an array delta or an object delta.')
   }
 }

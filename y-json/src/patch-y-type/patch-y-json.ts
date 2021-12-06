@@ -1,59 +1,47 @@
 import * as patchJson from 'yjs'
-import {
-  Delta,
-  isArrayDeletion,
-  isArrayDelta,
-  isArrayInsertion,
-  isArrayNestedDelta,
-  isArraySubstitution,
-  isNoDelta,
-  isObjectDeletion,
-  isObjectDelta,
-  isObjectInsertion,
-  isObjectNestedDelta,
-  isObjectSubstitution,
-} from '../../../json/src/diff-json'
+import { Delta, DeltaType, OperationType } from '../../../json/src/diff-json'
 import { assertIsYArray, assertIsYMap, assertIsYMapOrArray } from '../assertions'
 import { unknownToYTypeOrPrimitive } from '../y-utils'
 
 export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, delta: Delta): void {
-  if (isArrayDelta(delta)) {
+  if (delta.type === DeltaType.Array) {
     assertIsYArray(yType)
 
     for (const operation of delta.operations) {
-      if (isArrayDeletion(operation)) {
+      if (operation.operationType === OperationType.Deletion) {
         yType.delete(operation.index, operation.count)
-      } else if (isArrayInsertion(operation)) {
+      } else if (operation.operationType === OperationType.Insertion) {
         yType.insert(
           operation.index,
           operation.values.map(x => unknownToYTypeOrPrimitive(x)),
         )
-      } else if (isArraySubstitution(operation)) {
+      } else if (operation.operationType === OperationType.Substitution) {
         yType.delete(operation.index, 1)
         yType.insert(operation.index, [unknownToYTypeOrPrimitive(operation.value)])
-      } else if (isArrayNestedDelta(operation)) {
+      } else if (operation.operationType === OperationType.Nested) {
         const innerYType = yType.get(operation.index)
         assertIsYMapOrArray(innerYType, operation.index)
         patch(innerYType, operation.delta)
       }
     }
-  } else if (isObjectDelta(delta)) {
+  } else if (delta.type === DeltaType.Object) {
     assertIsYMap(yType)
 
     for (const operation of delta.operations) {
-      if (isObjectDeletion(operation)) {
+      if (operation.operationType === OperationType.Deletion) {
         yType.delete(operation.key)
-      } else if (isObjectInsertion(operation)) {
+      } else if (
+        operation.operationType === OperationType.Substitution ||
+        operation.operationType === OperationType.Insertion
+      ) {
         yType.set(operation.key, unknownToYTypeOrPrimitive(operation.value))
-      } else if (isObjectSubstitution(operation)) {
-        yType.set(operation.key, unknownToYTypeOrPrimitive(operation.value))
-      } else if (isObjectNestedDelta(operation)) {
+      } else if (operation.operationType === OperationType.Nested) {
         const innerYType = yType.get(operation.key)
         assertIsYMapOrArray(innerYType, operation.key)
         patch(innerYType, operation.delta)
       }
     }
-  } else if (!isNoDelta(delta)) {
+  } else {
     throw new Error('Expected delta to be an array delta, an object delta or no delta.')
   }
 }

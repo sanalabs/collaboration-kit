@@ -5,38 +5,24 @@ import {
   JsonTemplateObject,
   JsonTemplateObjectDeep,
 } from './'
-import {
-  Delta,
-  DeltaType,
-  diff,
-  isArrayNestedDelta,
-  isObjectNestedDelta,
-  Operation,
-  OperationType,
-  patch,
-} from './diff-json'
+import { Delta, DeltaType, diff, OperationType, patch } from './diff-json'
 import { deepNormalizeJson } from './normalize-json'
 
 type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> | undefined }
 
-function removeDeletionDeltas(delta: Delta): Delta {
-  const operations: Operation[] = []
+function removeDeletionDeltas<T extends Delta>(delta: T): void {
+  // We intentially do the same filtering in both cases, just to please TypeScript's type system
+  if (delta.type === DeltaType.Array) {
+    delta.operations = delta.operations.filter(x => x.operationType !== OperationType.Deletion)
+  } else {
+    delta.operations = delta.operations.filter(x => x.operationType !== OperationType.Deletion)
+  }
   for (const operation of delta.operations) {
-    if (operation.operationType !== OperationType.Deletion) {
-      if (isArrayNestedDelta(operation) || isObjectNestedDelta(operation)) {
-        operation.delta = removeDeletionDeltas(operation.delta)
-      }
-      operations.push(operation)
+    if (operation.operationType === OperationType.Nested) {
+      removeDeletionDeltas(operation.delta)
     }
   }
-  if (operations.length === 0) {
-    return {
-      type: DeltaType.NoDifference,
-      operations: [],
-    }
-  }
-  delta.operations = operations
-  return delta
+  return
 }
 
 // After application, objectToMutate will contain everything in newState.
@@ -49,8 +35,8 @@ export function deepMergeJson<T extends JsonTemplateObjectDeep>(
 ): void {
   assertIsJsonTemplate(objectToMutate)
   assertIsJsonTemplate(newState)
-  let delta = diff(objectToMutate, newState)
-  delta = removeDeletionDeltas(delta)
+  const delta = diff(objectToMutate, newState)
+  removeDeletionDeltas(delta)
   patch(objectToMutate, delta)
   deepNormalizeJson(objectToMutate)
 }
