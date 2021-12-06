@@ -18,13 +18,14 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
       } else if (operation.operationType === OperationType.Substitution) {
         yType.delete(operation.index, 1)
         yType.insert(operation.index, [unknownToYTypeOrPrimitive(operation.value)])
-      } else if (operation.operationType === OperationType.Nested) {
+      } else {
+        // Nested
         const innerYType = yType.get(operation.index)
         assertIsYMapOrArray(innerYType, operation.index)
         patch(innerYType, operation.delta)
       }
     }
-  } else if (delta.type === DeltaType.Object) {
+  } else {
     assertIsYMap(yType)
 
     for (const operation of delta.operations) {
@@ -35,13 +36,12 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
         operation.operationType === OperationType.Insertion
       ) {
         yType.set(operation.key, unknownToYTypeOrPrimitive(operation.value))
-      } else if (operation.operationType === OperationType.Nested) {
+      } else {
+        // Nested
         const innerYType = yType.get(operation.key)
         assertIsYMapOrArray(innerYType, operation.key)
         patch(innerYType, operation.delta)
       }
     }
-  } else {
-    throw new Error('Expected delta to be an array delta, an object delta or no delta.')
   }
 }

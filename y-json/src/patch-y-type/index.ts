@@ -51,7 +51,7 @@ export function patchYType(
     throw new Error('Expected old state to be either an Array or an object')
   }
   const delta = diffJson.diff(oldState, newState)
-  if (delta === undefined || _.isEqual(oldState, newState)) return
+  if (delta.operations.length === 0 || _.isEqual(oldState, newState)) return
 
   transact(
     yTypeToMutate,

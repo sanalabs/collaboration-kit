@@ -74,10 +74,13 @@ function compressInsertionOperations(insertionOperations: ArrayInsertion[]): Arr
   for (let i = 0; i < insertionOperations.length; i++) {
     const compressedOperation: ArrayInsertion = {
       operationType: OperationType.Insertion,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       index: insertionOperations[i]!.index,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       values: insertionOperations[i]!.values,
     }
     while (i < insertionOperations.length - 1) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const operation = insertionOperations[i + 1]!
       if (operation.index !== compressedOperation.index + compressedOperation.values.length) {
         break
@@ -95,10 +98,13 @@ function compressDeletionOperations(deletionOperations: ArrayDeletion[]): ArrayD
   for (let i = 0; i < deletionOperations.length; i++) {
     const compressedOperation: ArrayDeletion = {
       operationType: OperationType.Deletion,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       index: deletionOperations[i]!.index,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       count: deletionOperations[i]!.count,
     }
     while (i < deletionOperations.length - 1) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const operation = deletionOperations[i + 1]!
       if (operation.index !== compressedOperation.index + compressedOperation.count) {
         break
@@ -110,6 +116,12 @@ function compressDeletionOperations(deletionOperations: ArrayDeletion[]): ArrayD
   }
   return compressedDeletionOperations
 }
+
+type diff = (
+  oldState: unknown[] | Record<string, unknown>,
+  newState: unknown[] | Record<string, unknown>,
+  objectHashes?: Map<object | number | string | boolean, number>,
+) => Delta
 
 function diffArrays(
   oldState: unknown[],
@@ -294,7 +306,8 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         oldState.splice(operation.index, 0, operation.values)
       } else if (operation.operationType === OperationType.Substitution) {
         oldState.splice(operation.index, 1, operation.value)
-      } else if (operation.operationType === OperationType.Nested) {
+      } else {
+        // Nested
         const inner = oldState[operation.index]
         if (!isPlainArray(inner) && !isPlainObject(inner)) {
           throw new Error('Expected old state to be either an Array or an object')
@@ -302,7 +315,7 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         patch(inner, operation.delta)
       }
     }
-  } else if (delta.type === DeltaType.Object) {
+  } else {
     if (!isPlainObject(oldState)) {
       throw new Error('Expected old state to be a plain object')
     }
@@ -315,7 +328,8 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         operation.operationType === OperationType.Insertion
       ) {
         oldState[operation.key] = operation.value
-      } else if (operation.operationType === OperationType.Nested) {
+      } else {
+        // Nested
         const inner = oldState[operation.key]
         if (!isPlainArray(inner) && !isPlainObject(inner)) {
           throw new Error('Expected old state to be either an Array or an object')
@@ -323,7 +337,5 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
         patch(inner, operation.delta)
       }
     }
-  } else {
-    throw new Error('Expected delta to be an array delta or an object delta.')
   }
 }
