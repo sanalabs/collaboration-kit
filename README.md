@@ -2,33 +2,33 @@
 
 Monorepo for packages that facilitate working with arbitrary JSON structures in [Yjs](https://github.com/yjs/yjs).
 
-- `@sanalabs/y-react` Two-way sync of React state (TODO Jesper)
-- `@sanalabs/y-redux` Two-way sync of Redux and Yjs
-- `@sanalabs/y-json` Utility functions to mutate Yjs types according to a target JSON object
-- `@sanalabs/json` Utility functions to validate and mutate JSON (patch and merge)
+<!-- - `@sanalabs/y-react` Two-way sync of React state and Yjs -->
 
-## Notes
+- [`@sanalabs/y-redux`](sanalabsy-redux) Two-way sync of Redux and Yjs
+- [`@sanalabs/y-json`](sanalabsy-json) Utility functions to mutate Yjs types according to a target JSON object
+- [`@sanalabs/json`](sanalabsjson) Utility functions to mutate, validate and diff JSON objects
 
-### No excessive package dependencies
+# `@sanalabs/y-json`
 
-Collaboration Kit is split into multiple smaller packages so that excessive package dependencies can be avoided. You probably don't want to install React on your backend.
+The package exports a function `patchYType(yTypeToMutate, newState)` that applies Yjs operations on `yTypeToMutate` (an arbitrarily deep structure of YMaps, YArrays and JSON primitives) so that it represents a given JSON object `newState`. That is, `yTypeToMutate.toJSON() === newState`.
 
-### Peer dependencies
+# `@sanalabs/y-redux`
 
-A number of dependencies (react, redux, yjs) are [peer dependencies](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#peerdependencies). Otherwise, strange runtime bugs will occur due to version incompatibilities.
-
-# @sanalabs/y-redux
-
-The package exports a React component SyncYMap that acts as a two-way synchronization of a Redux state and a YMap. When SyncYMap is mounted it keeps the state in sync by:
+The package exports a React component `SyncYMap` that acts as a two-way synchronization of a Redux state and a YMap. When `SyncYMap` is mounted it keeps the state in sync by:
 
 1. Listening for changes to the YMap (observeDeep) and writing them to the Redux state (dispatching an action).
-2. Listening for changes to the Redux state (useSelector) and writing them to the Ymap (Yjs mutation operations).
+2. Listening for changes to the Redux state (useSelector) and writing them to the YMap (Yjs mutation operations).
 
 The YMap can be a deep structure containing YMaps, YArrays and JSON primitives.
 
-The Yjs mutations are batched into a transaction and are optimized to only touch the part of the state that changed.
+The Yjs mutations are batched into a transaction. Writes in both directions (Redux and Yjs) are throttled for performance (and is configurable).
 
-In addition one can use Immer (Redux Toolkit provides this out of the box) which allows the Yjs-to-Redux updates to be optimized and retain object references for parts of the state that don't change. We achieve this by using a function deepPatchJson that is also exported by Collaboration Kit. See example (TODO).
+### Retaining referential equality whenever possible
+
+Retaining object references for parts of the state that didn't change is important for performance and allows the caching mechanism of Redux selectors to function correctly.
+
+- Redux-to-Yjs: `SyncYMap` uses `patchYType` which creates Yjs operations only for the part of the state that changed.
+- Yjs-to-Redux: This can be done by using deepPatchJson (exported from `@sanalabs/json`) in the reducer that applies the Redux updates. See example (TODO).
 
 ## Usage example
 
@@ -58,6 +58,16 @@ export const SyncData = () => {
   )
 }
 ```
+
+## Notes
+
+### No excessive package dependencies
+
+Collaboration Kit is split into multiple smaller packages so that excessive package dependencies can be avoided. You probably don't want to install React on your backend.
+
+### Peer dependencies
+
+A number of dependencies (react, redux, yjs) are [peer dependencies](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#peerdependencies). Otherwise, strange runtime bugs will occur due to version incompatibilities.
 
 # Prior art
 
