@@ -1,9 +1,16 @@
 import _ from 'lodash'
 import * as Y from 'yjs'
-import { isPlainArray, isPlainObject, JsonArray, JsonObject } from '../../../json/src'
+import {
+  deepNormalizeJson,
+  isPlainArray,
+  isPlainObject,
+  JsonTemplateArray,
+  JsonTemplateObject,
+} from '../../../json/src'
+import * as diffJson from '../../../json/src/diff-json'
 import { assertIsYMapOrArray, isYArray, isYMap } from '../assertions'
 import { transact } from '../y-utils'
-import * as patchDiffJson from './patch-diff-json'
+import * as patchJson from './patch-json'
 
 type PatchYTypeOptions = {
   // The origin of the yjs transaction.
@@ -16,16 +23,21 @@ type PatchYTypeOptions = {
  */
 export function patchYType(
   yTypeToMutate: Y.Map<unknown>,
-  newState: JsonObject,
+  newState: JsonTemplateObject,
   options?: PatchYTypeOptions,
 ): void
 export function patchYType(
   yTypeToMutate: Y.Array<unknown>,
-  newState: JsonArray,
+  newState: JsonTemplateArray,
   options?: PatchYTypeOptions,
 ): void
-export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTypeOptions = {}): void {
+export function patchYType(
+  yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
+  newState: JsonTemplateObject | JsonTemplateArray,
+  options: PatchYTypeOptions = {},
+): void {
   assertIsYMapOrArray(yTypeToMutate, 'object root')
+  deepNormalizeJson(newState)
 
   const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
   const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
@@ -38,13 +50,13 @@ export function patchYType(yTypeToMutate: any, newState: any, options: PatchYTyp
   if (!isPlainArray(oldState) && !isPlainObject(oldState)) {
     throw new Error('Expected old state to be either an Array or an object')
   }
-  const delta = patchDiffJson.diff(oldState, newState)
+  const delta = diffJson.diff(oldState, newState)
   if (delta === undefined || _.isEqual(oldState, newState)) return
 
   transact(
     yTypeToMutate,
     () => {
-      patchDiffJson.patch(yTypeToMutate, delta)
+      patchJson.patch(yTypeToMutate, delta)
 
       // Verify that the patch was successful
       // This needs to be run inside the transaction, otherwise it is possible that

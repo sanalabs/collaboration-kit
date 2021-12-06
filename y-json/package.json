@@ -1,6 +1,6 @@
 {
   "name": "@sanalabs/y-json",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Transform Yjs Shared Types according to a JSON object",
   "license": "ISC",
   "main": "dist/cjs/y-json/src/index.js",
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.175",
-    "fast-json-patch": "^3.1.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "fast-json-patch": "^3.1.0"
   },
   "peerDependencies": {
     "yjs": "^13"

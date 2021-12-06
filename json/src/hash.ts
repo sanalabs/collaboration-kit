@@ -1,4 +1,4 @@
-import { isPlainArray, isPlainObject } from '../../../json/src'
+import { isPlainArray, isPlainObject } from './type-guards-plain'
 
 const Prime1 = 510137
 const Prime2 = 472369

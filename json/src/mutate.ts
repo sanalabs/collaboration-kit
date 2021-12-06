@@ -1,16 +1,20 @@
-import { applyPatch, compare } from 'fast-json-patch'
 import {
-  assertIsJson,
-  isJsonPrimitive,
-  isPlainArray,
-  isPlainObject,
-  Json,
-  JsonArray,
-  JsonContainer,
-  JsonObject,
-  JsonPrimitive,
+  assertIsJsonTemplate,
+  JsonTemplateArray,
+  JsonTemplateContainer,
+  JsonTemplateObject,
+  JsonTemplateObjectDeep,
 } from './'
-import { mkErr } from './error'
+import {
+  Delta,
+  diff,
+  isArrayNestedDelta,
+  isObjectNestedDelta,
+  Operation,
+  OperationType,
+  patch,
+} from './diff-json'
+import { deepNormalizeJson } from './normalize-json'
 
 function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
   if (val === undefined) throw new Error()
@@ -32,54 +36,46 @@ const keyExists = (obj: any, path: string): boolean => {
   return true
 }
 
-type JsonTemplatePrimitive = JsonPrimitive | undefined
-type JsonTemplateObject = { [key: string]: JsonTemplate }
-type JsonTemplateArray = JsonTemplate[]
-type JsonTemplateContainer = JsonTemplateObject | JsonTemplateArray
-type JsonTemplate = JsonTemplatePrimitive | JsonTemplateContainer
+type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> | undefined }
 
-function isJsonTemplatePrimitive(val: unknown): val is JsonTemplatePrimitive {
-  if (isJsonPrimitive(val)) return true
-  if (val === undefined) return true
-  return false
-}
-
-function assertIsJsonTemplatePrimitive(val: unknown): asserts val is JsonTemplatePrimitive {
-  if (!isJsonTemplatePrimitive(val))
-    throw mkErr(val, 'JSON template primitive (string | number | boolean | null | undefined)')
-}
-
-function assertIsJsonTemplate(val: unknown): asserts val is Json {
-  if (isPlainObject(val)) {
-    Object.values(val).forEach(assertIsJsonTemplate)
-  } else if (isPlainArray(val)) {
-    val.forEach(assertIsJsonTemplate)
-  } else {
-    assertIsJsonTemplatePrimitive(val)
+function removeDeltaDeletions(delta: Delta): void {
+  const operations: Operation[] = []
+  for (const operation of delta.operations) {
+    if (operation.operationType !== OperationType.Deletion) {
+      if (isArrayNestedDelta(operation) || isObjectNestedDelta(operation)) {
+        removeDeltaDeletions(operation.delta)
+      }
+      operations.push(operation)
+    }
   }
+  delta.operations = operations
 }
 
 // After application, objectToMutate will contain everything in newState.
 // Keys in objectToMutate are untouched if not present in newState.
 // Reference equality in objectToMutate is preserved whenever possible.
-// `undefined` values in newState objects denote deletions for objectToMutate
-export function deepMergeJson<T extends JsonObject>(objectToMutate: T, newState: JsonTemplateObject): void
-export function deepMergeJson<T extends JsonArray>(objectToMutate: T, newState: T): void
-export function deepMergeJson<T extends JsonContainer>(objectToMutate: T, newState: T): void {
-  assertIsJson(objectToMutate)
+// `undefined` values are removed
+export function deepMergeJson<T extends JsonTemplateObjectDeep>(
+  objectToMutate: T,
+  newState: DeepPartial<T>,
+): void {
+  assertIsJsonTemplate(objectToMutate)
   assertIsJsonTemplate(newState)
-  const diffs = compare(objectToMutate, newState).filter(
-    diff => diff.op !== 'remove' || keyExists(newState, diff.path) === true,
-  )
-  applyPatch(objectToMutate, diffs)
+  const delta = diff(objectToMutate, newState)
+  removeDeltaDeletions(delta)
+  patch(objectToMutate, delta)
+  deepNormalizeJson(objectToMutate)
 }
 
 // After application, objectToMutate will be deep-value-equal to newState.
 // Reference equality in objectToMutate is preserved whenever possible.
-export function deepPatchJson<T extends JsonObject>(objectToMutate: T, newState: T): void
-export function deepPatchJson<T extends JsonArray>(objectToMutate: T, newState: T): void
-export function deepPatchJson<T extends JsonContainer>(objectToMutate: T, newState: T): void {
-  assertIsJson(objectToMutate)
+// `undefined` values are removed
+export function deepPatchJson<T extends JsonTemplateObject>(objectToMutate: T, newState: T): void
+export function deepPatchJson<T extends JsonTemplateArray>(objectToMutate: T, newState: T): void
+export function deepPatchJson<T extends JsonTemplateContainer>(objectToMutate: T, newState: T): void {
+  assertIsJsonTemplate(objectToMutate)
   assertIsJsonTemplate(newState)
-  applyPatch(objectToMutate, compare(objectToMutate, newState))
+
+  patch(objectToMutate, diff(objectToMutate, newState))
+  deepNormalizeJson(objectToMutate)
 }

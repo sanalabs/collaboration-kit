@@ -34,6 +34,13 @@ describe('test merge', () => {
     deepMergeJson(source, target)
     expect(source).toStrictEqual({ deep: { a: 11, c: 3 } })
   })
+
+  it('handles array', () => {
+    const source = { a: [1, 2] }
+    const target = { a: [2] }
+    deepPatchJson(source, target)
+    expect(source).toStrictEqual({ a: [2] })
+  })
 })
 
 describe('test patch', () => {

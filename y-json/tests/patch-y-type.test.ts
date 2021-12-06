@@ -53,6 +53,16 @@ describe('patchYType tests', () => {
     )
   })
 
+  it('handlesblah', () => {
+    const yMap = utils.makeYMap()
+    const firstState = { a: [{ b: 'c' }] }
+    const secondState = { a: [''] }
+    patchYType(yMap, firstState)
+    expect(yMap.toJSON()).toEqual(firstState)
+    // patchYType(yMap, secondState)
+    // expect(yMap.toJSON()).toEqual(secondState)
+  })
+
   it('handles long strings in maps', () => {
     fc.assert(
       fc.property(utils.arbitraryLongString(), utils.arbitraryLongString(), (string1, string2) => {

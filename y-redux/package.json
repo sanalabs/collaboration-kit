@@ -1,6 +1,6 @@
 {
   "name": "@sanalabs/y-redux",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Redux state synced with Yjs",
   "license": "ISC",
   "main": "dist/cjs/y-redux/src/index.js",
@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.177",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "fast-json-patch": "^3.1.0"
   }
 }

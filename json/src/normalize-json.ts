@@ -1,7 +1,15 @@
-import { assertIsPlainContainer, isJsonPrimitive, isPlainArray, isPlainContainer, isPlainObject } from '.'
+import {
+  assertIsPlainContainer,
+  isJsonPrimitive,
+  isPlainArray,
+  isPlainContainer,
+  isPlainObject,
+  JsonContainer,
+  PlainContainer,
+} from '.'
 
 // Deep remove all non-json values
-export function deepNormalizeJson(val: Record<string, unknown> | unknown[]): void {
+export function deepNormalizeJson(val: PlainContainer): asserts val is JsonContainer {
   assertIsPlainContainer(val)
 
   if (isPlainObject(val)) {
