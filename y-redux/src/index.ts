@@ -179,7 +179,10 @@ export const SyncYAwareness = <T extends JsonObject>({
     const throttledHandler = _.throttle(handler, throttleReceiveMs)
     awareness.on('change', throttledHandler)
 
-    return () => awareness.off('change', throttledHandler)
+    return () => {
+      awareness.off('change', throttledHandler)
+      throttledHandler.flush()
+    }
   }, [awareness, dispatch, setAwarenessStates])
 
   return null
