@@ -24,7 +24,7 @@ function removeDeletionDeltas(delta: Delta): Delta {
   for (const operation of delta.operations) {
     if (operation.operationType !== OperationType.Deletion) {
       if (isArrayNestedDelta(operation) || isObjectNestedDelta(operation)) {
-        removeDeletionDeltas(operation.delta)
+        operation.delta = removeDeletionDeltas(operation.delta)
       }
       operations.push(operation)
     }

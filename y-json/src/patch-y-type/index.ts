@@ -10,7 +10,7 @@ import {
 import * as diffJson from '../../../json/src/diff-json'
 import { assertIsYMapOrArray, isYArray, isYMap } from '../assertions'
 import { transact } from '../y-utils'
-import * as patchJson from './patch-json'
+import * as patchJson from './patch-y-json'
 
 type PatchYTypeOptions = {
   // The origin of the yjs transaction.

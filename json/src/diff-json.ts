@@ -40,6 +40,7 @@ export interface ObjectDelta extends Delta {
 
 export interface NoDelta extends Delta {
   type: DeltaType.NoDifference
+  operations: []
 }
 
 export const isArrayDelta = (d: Delta): d is ArrayDelta => d.type === DeltaType.Array
@@ -366,9 +367,7 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
     for (const operation of delta.operations) {
       if (isObjectDeletion(operation)) {
         delete oldState[operation.key]
-      } else if (isObjectInsertion(operation)) {
-        oldState[operation.key] = operation.value
-      } else if (isObjectSubstitution(operation)) {
+      } else if (isObjectSubstitution(operation) || isObjectInsertion(operation)) {
         oldState[operation.key] = operation.value
       } else if (isObjectNestedDelta(operation)) {
         const inner = oldState[operation.key]

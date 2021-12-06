@@ -1,5 +1,6 @@
 import { isPlainArray, isPlainObject } from './type-guards-plain'
 
+// Some arbitrary primes used to make the hash behave randomly.
 const Prime1 = 510137
 const Prime2 = 472369
 const Prime3 = 751321

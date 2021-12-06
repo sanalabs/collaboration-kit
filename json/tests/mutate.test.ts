@@ -94,4 +94,23 @@ describe('test patch', () => {
     deepPatchJson(source, target)
     expect(source).toStrictEqual({ deep: { a: 11 } })
   })
+
+  it('does nothing when there is no diff', () => {
+    const source = { deep: { a: 1 } }
+    const target = { deep: { a: 1 } }
+
+    const sourceRefBefore = source.deep
+    deepPatchJson(source, target)
+    const sourceRefAfter = source.deep
+
+    expect(source).toStrictEqual({ deep: { a: 1 } })
+    expect(sourceRefBefore).toBe(sourceRefAfter)
+  })
+
+  it('deletes everything when target is empty', () => {
+    const source = { deep: { a: 1 } }
+    const target = {}
+    deepPatchJson(source, target)
+    expect(source).toStrictEqual({})
+  })
 })

@@ -6,6 +6,7 @@ import {
   isArrayInsertion,
   isArrayNestedDelta,
   isArraySubstitution,
+  isNoDelta,
   isObjectDeletion,
   isObjectDelta,
   isObjectInsertion,
@@ -52,7 +53,7 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
         patch(innerYType, operation.delta)
       }
     }
-  } else {
-    throw new Error('Expected delta to be either an array delta or an object delta.')
+  } else if (!isNoDelta(delta)) {
+    throw new Error('Expected delta to be an array delta, an object delta or no delta.')
   }
 }
