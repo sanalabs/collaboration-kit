@@ -51,12 +51,10 @@ interface ObjectNestedDelta {
 
 export type ArrayOperation = ArrayInsertion | ArrayDeletion | ArraySubstitution | ArrayNestedDelta
 export type ObjectOperation = ObjectInsertion | ObjectDeletion | ObjectSubstitution | ObjectNestedDelta
-export type Operation = ArrayOperation | ObjectOperation
 
 export enum DeltaType {
   Array = 'array',
   Object = 'object',
-  NoDifference = 'no-diff',
 }
 
 export interface ArrayDelta {
