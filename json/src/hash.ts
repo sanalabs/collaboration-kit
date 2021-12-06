@@ -8,6 +8,7 @@ const Prime4 = 532489
 const Prime5 = 301813
 const Prime6 = 545023
 const Prime7 = 31
+const Prime8 = 720571
 
 export function hash(state: unknown, objectHashes: Map<object | number | string | boolean, number>): number {
   if (typeof state === 'number') {
@@ -23,8 +24,11 @@ export function hash(state: unknown, objectHashes: Map<object | number | string 
     }
     return h
   }
+  if (state === undefined) {
+    return Prime8
+  }
   if (typeof state !== 'object') {
-    throw new Error('Unreachable')
+    throw new Error(`Cannot hash ${typeof state}`)
   }
   if (state === null) {
     return Prime5
