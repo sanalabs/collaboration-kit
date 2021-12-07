@@ -1,6 +1,6 @@
 {
   "name": "@sanalabs/json",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Utility functions to validate and mutate JSON (patch and merge)",
   "license": "ISC",
   "main": "dist/cjs/index.js",
@@ -12,5 +12,11 @@
     "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
     "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
     "build": "npm run build:cjs && npm run build:esm"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.177"
   }
 }
