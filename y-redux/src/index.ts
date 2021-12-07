@@ -80,10 +80,14 @@ export const SyncYMap = <T extends JsonObject, RootState>({
   useEffect(() => () => throttledSendChanges.flush(), [])
 
   useEffect(() => {
-    const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      if (transaction.origin === origin) return
-
+    const handler = (): void => {
       const newData = yMap.toJSON() as T
+
+      if (_.isEqual(newData, {})) {
+        // yMap is empty and most likely not yet synced
+        return
+      }
+
       const latestReduxData = selectData(store.getState() as RootState)
 
       if (_.isEqual(newData, latestReduxData)) {
@@ -93,6 +97,13 @@ export const SyncYMap = <T extends JsonObject, RootState>({
 
       console.debug('[SyncYMap] remote data changed')
       dispatch(setData(newData))
+    }
+
+    handler() // Run once on setup
+
+    const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
+      if (transaction.origin === origin) return
+      handler()
     }
 
     const throttledObserver = _.throttle(observer, throttleReceiveMs)
@@ -174,7 +185,7 @@ export const SyncYAwareness = <T extends JsonObject>({
       dispatch(setAwarenessStates(states))
     }
 
-    handler()
+    handler() // Run once on setup
 
     const throttledHandler = _.throttle(handler, throttleReceiveMs)
     awareness.on('change', throttledHandler)
