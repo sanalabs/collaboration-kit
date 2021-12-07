@@ -1,4 +1,4 @@
-import { longestCommonSubsequence } from '../src/patch-y-type/lcs'
+import { longestCommonSubsequence } from '../src/lcs'
 
 describe('longestCommonSubsequence', () => {
   it('returns empty when no overlap', () => {

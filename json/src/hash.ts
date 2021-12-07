@@ -1,5 +1,6 @@
-import { isPlainArray, isPlainObject } from '../../../json/src'
+import { isPlainArray, isPlainObject } from './type-guards-plain'
 
+// Some arbitrary primes used to make the hash behave randomly.
 const Prime1 = 510137
 const Prime2 = 472369
 const Prime3 = 751321
@@ -7,6 +8,7 @@ const Prime4 = 532489
 const Prime5 = 301813
 const Prime6 = 545023
 const Prime7 = 31
+const Prime8 = 720571
 
 export function hash(state: unknown, objectHashes: Map<object | number | string | boolean, number>): number {
   if (typeof state === 'number') {
@@ -22,8 +24,11 @@ export function hash(state: unknown, objectHashes: Map<object | number | string 
     }
     return h
   }
+  if (state === undefined) {
+    return Prime8
+  }
   if (typeof state !== 'object') {
-    throw new Error('Unreachable')
+    throw new Error(`Cannot hash ${typeof state}`)
   }
   if (state === null) {
     return Prime5

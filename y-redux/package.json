@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.177",
-    "lodash": "^4.17.21",
-    "fast-json-patch": "^3.1.0"
+    "lodash": "^4.17.21"
   }
 }

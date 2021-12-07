@@ -1,4 +1,3 @@
-import { applyPatch, compare } from 'fast-json-patch'
 import {
   assertIsJsonTemplate,
   JsonTemplateArray,
@@ -6,29 +5,25 @@ import {
   JsonTemplateObject,
   JsonTemplateObjectDeep,
 } from './'
+import { Delta, DeltaType, diff, OperationType, patch } from './diff-json'
 import { deepNormalizeJson } from './normalize-json'
 
-function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
-  if (val === undefined) throw new Error()
-  if (val === null) throw new Error()
-}
-
-const keyExists = (obj: any, path: string): boolean => {
-  const keys = path.split('/')
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  let curr = obj
-  for (let i = 1; i < keys.length; i++) {
-    const key = keys[i]
-    assertIsDefined(key)
-    if (!(key in curr)) return false
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    curr = curr[key]
-  }
-
-  return true
-}
-
 type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> | undefined }
+
+function removeDeletionDeltas<T extends Delta>(delta: T): void {
+  // We intentially do the same filtering in both cases, just to please TypeScript's type system
+  if (delta.type === DeltaType.Array) {
+    delta.operations = delta.operations.filter(x => x.operationType !== OperationType.Deletion)
+  } else {
+    delta.operations = delta.operations.filter(x => x.operationType !== OperationType.Deletion)
+  }
+  for (const operation of delta.operations) {
+    if (operation.operationType === OperationType.Nested) {
+      removeDeletionDeltas(operation.delta)
+    }
+  }
+  return
+}
 
 // After application, objectToMutate will contain everything in newState.
 // Keys in objectToMutate are untouched if not present in newState.
@@ -40,12 +35,9 @@ export function deepMergeJson<T extends JsonTemplateObjectDeep>(
 ): void {
   assertIsJsonTemplate(objectToMutate)
   assertIsJsonTemplate(newState)
-
-  const diffs = compare(objectToMutate, newState).filter(
-    diff => diff.op !== 'remove' || keyExists(newState, diff.path) === true,
-  )
-
-  applyPatch(objectToMutate, diffs)
+  const delta = diff(objectToMutate, newState)
+  removeDeletionDeltas(delta)
+  patch(objectToMutate, delta)
   deepNormalizeJson(objectToMutate)
 }
 
@@ -58,6 +50,6 @@ export function deepPatchJson<T extends JsonTemplateContainer>(objectToMutate: T
   assertIsJsonTemplate(objectToMutate)
   assertIsJsonTemplate(newState)
 
-  applyPatch(objectToMutate, compare(objectToMutate, newState))
+  patch(objectToMutate, diff(objectToMutate, newState))
   deepNormalizeJson(objectToMutate)
 }
