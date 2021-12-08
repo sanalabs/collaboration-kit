@@ -113,4 +113,11 @@ describe('test patch', () => {
     deepPatchJson(source, target)
     expect(source).toStrictEqual({})
   })
+
+  it('patches arrays correctly', () => {
+    const source: string[] = []
+    const target: string[] = ['a']
+    deepPatchJson(source, target)
+    expect(source).toStrictEqual(target)
+  })
 })
