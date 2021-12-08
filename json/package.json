@@ -1,6 +1,6 @@
 {
   "name": "@sanalabs/json",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Utility functions to validate and mutate JSON (patch and merge)",
   "license": "ISC",
   "main": "dist/cjs/index.js",
