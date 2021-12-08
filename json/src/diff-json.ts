@@ -303,7 +303,7 @@ export function patch(oldState: unknown[] | Record<string, unknown>, delta: Delt
       if (operation.operationType === OperationType.Deletion) {
         oldState.splice(operation.index, operation.count)
       } else if (operation.operationType === OperationType.Insertion) {
-        oldState.splice(operation.index, 0, operation.values)
+        oldState.splice(operation.index, 0, ...operation.values)
       } else if (operation.operationType === OperationType.Substitution) {
         oldState.splice(operation.index, 1, operation.value)
       } else {
