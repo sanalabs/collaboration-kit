@@ -1,4 +1,7 @@
+import * as fc from 'fast-check'
 import { deepMergeJson, deepPatchJson } from '../src/mutate'
+import * as utils from './utils'
+import { cloneWithArbitraryDeletions, removeArrayProperties } from './utils'
 
 describe('test merge', () => {
   it('keeps references intact', () => {
@@ -57,6 +60,31 @@ describe('test merge', () => {
 
     expect(source).toStrictEqual({ deep: { a: 1 } })
     expect(sourceRefBefore).toBe(sourceRefAfter)
+  })
+
+  it('ignores object deletions', () => {
+    fc.assert(
+      fc.property(utils.arbitraryJSONObject(), state => {
+        const firstState = removeArrayProperties(state)
+        const firstStateClone = removeArrayProperties(state)
+        const secondState = cloneWithArbitraryDeletions(firstState)
+        deepMergeJson(firstState, secondState)
+        expect(firstState).toStrictEqual(firstStateClone)
+      }),
+      { numRuns: 1000 },
+    )
+  })
+
+  it('handles arbitrary insertions', () => {
+    fc.assert(
+      fc.property(utils.arbitraryJSONObject(), state => {
+        const firstState = {}
+        const secondState = removeArrayProperties(state)
+        deepMergeJson(firstState, secondState)
+        expect(firstState).toStrictEqual(secondState)
+      }),
+      { numRuns: 1000 },
+    )
   })
 })
 
@@ -119,5 +147,25 @@ describe('test patch', () => {
     const target: string[] = ['a']
     deepPatchJson(source, target)
     expect(source).toStrictEqual(target)
+  })
+
+  it('handles arbitrary object mutations', () => {
+    fc.assert(
+      fc.property(utils.arbitraryJSONObject(), utils.arbitraryJSONObject(), (firstState, secondState) => {
+        deepPatchJson(firstState, secondState)
+        expect(firstState).toStrictEqual(secondState)
+      }),
+      { numRuns: 1000 },
+    )
+  })
+
+  it('handles arbitrary array mutations', () => {
+    fc.assert(
+      fc.property(utils.arbitraryJSONArray(), utils.arbitraryJSONArray(), (firstState, secondState) => {
+        deepPatchJson(firstState, secondState)
+        expect(firstState).toStrictEqual(secondState)
+      }),
+      { numRuns: 1000 },
+    )
   })
 })
