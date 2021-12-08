@@ -17,6 +17,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.177"
+    "@types/lodash": "^4.14.177",
+    "fast-check": "^2.19.0"
   }
 }
