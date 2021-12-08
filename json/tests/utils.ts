@@ -11,11 +11,6 @@ import {
   JsonTemplateObjectDeep,
 } from '../src'
 
-export type RandomArr = RandomValue[]
-export type RandomPrimitive = string | number | boolean
-export type RandomValue = RandomPrimitive | RandomArr | RandomObj
-export type RandomObj = { [key: string]: RandomValue }
-
 // We strictly want values that can be serialized as JSON.
 // fast-check by default gives us -0, which can be deserialized but not serialized.
 // See: https://github.com/dubzzz/fast-check/blob/main/documentation/Arbitraries.md
@@ -40,8 +35,6 @@ export const arbitraryJSONArray = (): Arbitrary<JsonArray> =>
       assertIsJsonArray(it)
       return it
     })
-
-export const arbitraryLongString = (): Arbitrary<string> => fc.string({ maxLength: 500 })
 
 export const removeArrayProperties = (x: JsonObject): JsonTemplateObjectDeep => {
   const y: JsonTemplateObjectDeep = {}
