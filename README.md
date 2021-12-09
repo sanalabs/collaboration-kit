@@ -1,4 +1,4 @@
-# Collaboration Kit
+# Collaboration Kit (Alpha Preview)
 
 Monorepo for packages that facilitate working with arbitrary JSON structures in [Yjs](https://github.com/yjs/yjs).
 
@@ -10,7 +10,7 @@ Monorepo for packages that facilitate working with arbitrary JSON structures in 
 
 # `@sanalabs/y-json`
 
-The package exports a function `patchYType(yTypeToMutate, newState)` that applies Yjs operations on `yTypeToMutate` (an arbitrarily deep structure of YMaps, YArrays and JSON primitives) so that it represents a given JSON object `newState`. That is, `yTypeToMutate.toJSON() === newState`.
+The package exports a function `patchYType(yTypeToMutate, newState)` that applies Yjs operations on `yTypeToMutate` (an arbitrarily deep structure of YMaps, YArrays and JSON primitives) so that it represents a given JSON object `newState`. That is, `yTypeToMutate.toJSON()` is deep-equal to `newState`.
 
 # `@sanalabs/y-redux`
 
