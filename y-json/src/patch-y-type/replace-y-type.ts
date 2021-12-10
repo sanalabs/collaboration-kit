@@ -1,4 +1,5 @@
 import * as Y from 'yjs'
+import { assertIsJsonPrimitive } from '../../../json/src'
 
 function cloneIfYType(value: unknown): unknown {
   if (
@@ -11,6 +12,7 @@ function cloneIfYType(value: unknown): unknown {
   ) {
     return value.clone()
   }
+  assertIsJsonPrimitive(value)
   return value
 }
 
@@ -19,24 +21,19 @@ export function replaceYType(
   src: Y.Map<unknown> | Y.Array<unknown>,
 ): void {
   if (dst instanceof Y.Map && src instanceof Y.Map) {
-    const srcKeys: Set<string> = new Set()
-    src.forEach((value, key) => {
-      srcKeys.add(key)
-    })
-    dst.forEach((value, key) => {
+    const srcKeys = new Set(src.keys())
+    for (const key of dst.keys()) {
       if (!srcKeys.has(key)) {
         dst.delete(key)
       }
-    })
+    }
     src.forEach((value, key) => {
       dst.set(key, cloneIfYType(value))
     })
   } else if (dst instanceof Y.Array && src instanceof Y.Array) {
     dst.delete(0, dst.length)
-    src.forEach((value, index) => {
-      dst.insert(index, [cloneIfYType(value)])
-    })
+    dst.insert(0, src.map(cloneIfYType))
   } else {
-    throw 'Failed to rollback document: shared objects have different types'
+    throw new Error('Shared objects have different types')
   }
 }
