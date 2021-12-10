@@ -1,9 +1,18 @@
-import * as patchJson from 'yjs'
+import _ from 'lodash'
+import * as Y from 'yjs'
+import {
+  deepNormalizeJson,
+  isPlainArray,
+  isPlainObject,
+  JsonTemplateArray,
+  JsonTemplateObject,
+} from '../../../json/src'
+import * as diffJson from '../../../json/src/diff-json'
 import { Delta, DeltaType, OperationType } from '../../../json/src/diff-json'
-import { assertIsYArray, assertIsYMap, assertIsYMapOrArray } from '../assertions'
-import { unknownToYTypeOrPrimitive } from '../y-utils'
+import { assertIsYArray, assertIsYMap, assertIsYMapOrArray, isYArray, isYMap } from '../assertions'
+import { transact, unknownToYTypeOrPrimitive } from '../y-utils'
 
-export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, delta: Delta): void {
+function patch(yType: Y.Map<unknown> | Y.Array<unknown>, delta: Delta): void {
   if (delta.type === DeltaType.Array) {
     assertIsYArray(yType)
 
@@ -44,4 +53,65 @@ export function patch(yType: patchJson.Map<unknown> | patchJson.Array<unknown>, 
       }
     }
   }
+}
+
+type PatchYTypeOptions = {
+  // The origin of the yjs transaction.
+  // For context see: https://discuss.yjs.dev/t/determining-whether-a-transaction-is-local/361/3
+  origin?: unknown
+}
+
+/**
+ * Mutate a Y.Map or Y.Array into the given `newState`.
+ * The mutations will be batched in a single transaction if the yjs type is within a document.
+ */
+export function patchYType(
+  yTypeToMutate: Y.Map<unknown>,
+  newState: JsonTemplateObject,
+  options?: PatchYTypeOptions,
+): void
+export function patchYType(
+  yTypeToMutate: Y.Array<unknown>,
+  newState: JsonTemplateArray,
+  options?: PatchYTypeOptions,
+): void
+export function patchYType(
+  yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
+  newState: JsonTemplateObject | JsonTemplateArray,
+  options: PatchYTypeOptions = {},
+): void {
+  assertIsYMapOrArray(yTypeToMutate, 'object root')
+  deepNormalizeJson(newState)
+
+  const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
+  const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
+
+  if (!isYArrayAndArray && !isYMapAndObject) {
+    throw new Error('Expected either a Y.Array and an Array, or a Y.Map and an object')
+  }
+
+  const oldState: unknown = yTypeToMutate.toJSON()
+  if (!isPlainArray(oldState) && !isPlainObject(oldState)) {
+    throw new Error('Expected old state to be either an Array or an object')
+  }
+  const delta = diffJson.diff(oldState, newState)
+  if (delta.operations.length === 0 || _.isEqual(oldState, newState)) return
+
+  transact(
+    yTypeToMutate,
+    () => {
+      patch(yTypeToMutate, delta)
+
+      // Verify that the patch was successful
+      // This needs to be run inside the transaction, otherwise it is possible that
+      // the yDoc has a different value by the time we run the check.
+      const yState: unknown = yTypeToMutate.toJSON()
+      if (!_.isEqual(yState, newState)) {
+        throw new Error(
+          `Failed to patch yType. ${JSON.stringify({ yState, newState, oldState, delta }, null, 2)}`,
+        )
+      }
+    },
+    options.origin ?? null,
+  )
 }
