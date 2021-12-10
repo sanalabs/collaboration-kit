@@ -16,6 +16,7 @@ function cloneIfYType(value: unknown): unknown {
   return value
 }
 
+/** Replaces the content of dst with the content of src by cloning each item. */
 export function replaceYType(
   dst: Y.Map<unknown> | Y.Array<unknown>,
   src: Y.Map<unknown> | Y.Array<unknown>,
