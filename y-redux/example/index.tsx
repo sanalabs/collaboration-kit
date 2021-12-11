@@ -3,7 +3,7 @@ export {}
 // import { useEffect, useMemo } from 'react'
 // import { useDispatch, useSelector } from 'react-redux'
 // import * as Y from 'yjs'
-// import { SyncYAwareness, SyncYMap } from '../src'
+// import { SyncYAwareness, SyncYJson } from '../src'
 // import { setAwarenessStates, setData } from './actions'
 // import { selectData, selectLocalAwarenessState } from './selectors'
 
@@ -35,7 +35,7 @@ export {}
 
 //   return (
 //     <>
-//       <SyncYMap yMap={yMap} setData={setData} selectData={selectData} decodeData={decodeData} />
+//       <SyncYJson yMap={yMap} setData={setData} selectData={selectData} decodeData={decodeData} />
 //       <SyncYAwareness
 //         awareness={yProvider.awareness}
 //         setAwarenessStates={setAwarenessStates}
