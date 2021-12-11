@@ -11,7 +11,7 @@ export function transact(
   origin: unknown,
 ): void {
   if (!yType.doc) {
-    throw new Error('Cannot operate on an YType that is not attached to a YDoc.')
+    throw new Error('Refusing to operate on an YType that is not attached to a YDoc.')
   }
 
   yType.doc.transact(transaction, origin)

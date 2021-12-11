@@ -10,7 +10,7 @@ Monorepo for packages that facilitate working with arbitrary JSON structures in 
 
 # `@sanalabs/y-json`
 
-The package exports a function `patchYType(yTypeToMutate, newState)` that applies Yjs operations on `yTypeToMutate` (an arbitrarily deep structure of YMaps, YArrays and JSON primitives) so that it represents a given JSON object `newState`. That is, `yTypeToMutate.toJSON()` is deep-equal to `newState`.
+The package exports a function `patchYJson(yTypeToMutate, newState)` that applies Yjs operations on `yTypeToMutate` (an arbitrarily deep structure of YMaps, YArrays and JSON primitives) so that it represents a given JSON object `newState`. That is, `yTypeToMutate.toJSON()` is deep-equal to `newState`.
 
 # `@sanalabs/y-redux`
 
@@ -27,7 +27,7 @@ The Yjs mutations are batched into a transaction. Writes in both directions (Red
 
 Retaining object references for parts of the state that didn't change is important for performance and allows the caching mechanism of Redux selectors to function correctly.
 
-- Redux-to-Yjs: `SyncYMap` uses `patchYType` which creates Yjs operations only for the part of the state that changed.
+- Redux-to-Yjs: `SyncYMap` uses `patchYJson` which creates Yjs operations only for the part of the state that changed.
 - Yjs-to-Redux: This can be done by using deepPatchJson (exported from `@sanalabs/json`) in the reducer that applies the Redux updates. See example (TODO).
 
 ## Usage example
