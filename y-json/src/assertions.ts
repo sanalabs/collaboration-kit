@@ -1,5 +1,6 @@
 import * as Y from 'yjs'
-import { mkErr } from '../../json/src/error'
+import { isJsonPrimitive } from '../../json/src'
+import { AssertionError, mkErr } from '../../json/src/error'
 
 export type YJson = Y.Map<YJson> | Y.Array<YJson> | string | number | boolean | null
 
@@ -27,4 +28,44 @@ export function assertIsYMapOrArray(
 ): asserts val is Y.Map<unknown> | Y.Array<unknown> {
   if (isYMap(val) || isYArray(val)) return
   throw mkErr(val, `Y.Map or Y.Array at property ${property}`)
+}
+
+export function assertIsYJson(yType: unknown): asserts yType is YJson {
+  const recurse = (val: unknown, path: string): void => {
+    if (val instanceof Y.Map) {
+      for (const key of val.keys()) {
+        recurse(val.get(key), `${path}.get('${key}')`)
+      }
+      return
+    }
+
+    if (val instanceof Y.Array) {
+      const len = val.length
+      for (let i = 0; i < len; i++) {
+        recurse(val.get(i), `${path}.get(${i})`)
+      }
+      return
+    }
+
+    if (
+      val instanceof Y.Text ||
+      val instanceof Y.XmlFragment ||
+      val instanceof Y.XmlElement ||
+      val instanceof Y.XmlText
+    ) {
+      throw new AssertionError(
+        `assertIsYJson: Expected ${val.constructor.name} to be YMap or YArray at ${path}`,
+      )
+    }
+
+    if (!isJsonPrimitive(val)) {
+      throw new AssertionError(
+        `assertIsYJson: Expected ${JSON.stringify(
+          val,
+        )} to be JSON primitive (string | number | boolean | null) at ${path}`,
+      )
+    }
+  }
+
+  recurse(yType, 'yType')
 }

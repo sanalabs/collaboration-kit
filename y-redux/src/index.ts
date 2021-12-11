@@ -5,7 +5,7 @@ import { AnyAction, Store } from 'redux'
 import { Awareness } from 'y-protocols/awareness.js'
 import * as Y from 'yjs'
 import { JsonObject } from '../../json/src'
-import { patchYType } from '../../y-json/src'
+import { patchYJson } from '../../y-json/src'
 
 export type BaseAwarenessState = {
   clientId: number
@@ -36,7 +36,7 @@ function sendChanges<T extends JsonObject, RootState>(
       return
     }
 
-    patchYType(yMap, latestRedux, { origin })
+    patchYJson(yMap, latestRedux, { origin })
   }
 }
 

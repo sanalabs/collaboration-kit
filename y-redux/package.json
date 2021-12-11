@@ -1,5 +1,5 @@
 {
-  "name": "@sanalabs/y-redux",
+  "name": "y-redux",
   "version": "0.1.8",
   "description": "Redux state synced with Yjs",
   "license": "ISC",

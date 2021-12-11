@@ -9,7 +9,14 @@ import {
 } from '../../../json/src'
 import * as diffJson from '../../../json/src/diff-json'
 import { Delta, DeltaType, OperationType } from '../../../json/src/diff-json'
-import { assertIsYArray, assertIsYMap, assertIsYMapOrArray, isYArray, isYMap } from '../assertions'
+import {
+  assertIsYArray,
+  assertIsYJson,
+  assertIsYMap,
+  assertIsYMapOrArray,
+  isYArray,
+  isYMap,
+} from '../assertions'
 import { transact, unknownToYTypeOrPrimitive } from '../y-utils'
 
 function patch(yType: Y.Map<unknown> | Y.Array<unknown>, delta: Delta): void {
@@ -55,31 +62,33 @@ function patch(yType: Y.Map<unknown> | Y.Array<unknown>, delta: Delta): void {
   }
 }
 
-type PatchYTypeOptions = {
+type PatchYJsonOptions = {
   // The origin of the yjs transaction.
   // For context see: https://discuss.yjs.dev/t/determining-whether-a-transaction-is-local/361/3
   origin?: unknown
 }
 
 /**
- * Mutate a Y.Map or Y.Array into the given `newState`.
- * The mutations will be batched in a single transaction if the yjs type is within a document.
+ * Mutate a YMap or YArray into the given `newState`.
+ * The mutations are batched in a single transaction.
+ * Proper nesting of YMap and YArray is used for nested data.
  */
-export function patchYType(
+export function patchYJson(
   yTypeToMutate: Y.Map<unknown>,
   newState: JsonTemplateObject,
-  options?: PatchYTypeOptions,
+  options?: PatchYJsonOptions,
 ): void
-export function patchYType(
+export function patchYJson(
   yTypeToMutate: Y.Array<unknown>,
   newState: JsonTemplateArray,
-  options?: PatchYTypeOptions,
+  options?: PatchYJsonOptions,
 ): void
-export function patchYType(
+export function patchYJson(
   yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
   newState: JsonTemplateObject | JsonTemplateArray,
-  options: PatchYTypeOptions = {},
+  options: PatchYJsonOptions = {},
 ): void {
+  assertIsYJson(yTypeToMutate)
   assertIsYMapOrArray(yTypeToMutate, 'object root')
   deepNormalizeJson(newState)
 
