@@ -1,6 +1,6 @@
 {
-  "name": "y-redux",
-  "version": "0.1.8",
+  "name": "@sanalabs/y-redux",
+  "version": "0.1.9",
   "description": "Redux state synced with Yjs",
   "license": "ISC",
   "main": "dist/cjs/y-redux/src/index.js",
