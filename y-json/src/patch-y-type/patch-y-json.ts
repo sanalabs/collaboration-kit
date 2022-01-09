@@ -90,6 +90,8 @@ export function patchYJson(
 ): void {
   assertIsYJson(yTypeToMutate)
   assertIsYMapOrArray(yTypeToMutate, 'object root')
+
+  newState = _.cloneDeep(newState) // Prevent patchYJson having side effects on newState
   deepNormalizeJson(newState)
 
   const isYArrayAndArray = isYArray(yTypeToMutate) && isPlainArray(newState)
