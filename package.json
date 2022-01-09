@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "setup:dev": "npm ci && npm ci --prefix json && npm ci --prefix y-json && npm ci --prefix y-react && npm ci --prefix y-redux && npm ci --prefix examples/react-example",
+    "setup:dev": "npm i && npm i --prefix json && npm i --prefix y-json && npm i --prefix y-react && npm i --prefix y-redux && npm i --prefix examples/react-example",
+    "setup:ci": "npm ci && npm ci --prefix json && npm ci --prefix y-json && npm ci --prefix y-react && npm ci --prefix y-redux && npm ci --prefix examples/react-example",
     "setup:prod": "npm ci && npm ci --prefix json --only=prod && npm ci --prefix y-json --only=prod && npm ci --prefix y-react --only=prod && npm ci --prefix y-redux --only=prod",
     "clean:node_modules": "rm -rf */node_modules",
     "clean:dist": "rm -rf */dist",

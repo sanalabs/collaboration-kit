@@ -3,14 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { Store } from 'redux'
 import * as Y from 'yjs'
-import {
-  isPlainArray,
-  isPlainObject,
-  JsonTemplateArray,
-  JsonTemplateContainer,
-  JsonTemplateObject,
-} from '../../json/src'
-import { isYArray, isYMap, patchYJson } from '../../y-json/src'
+import { JsonTemplateArray, JsonTemplateContainer, JsonTemplateObject } from '../../json/src'
+import { patchYJson } from '../../y-json/src'
 
 function sendChanges<T extends JsonTemplateContainer, RootState>(
   store: Store,
@@ -36,13 +30,7 @@ function sendChanges<T extends JsonTemplateContainer, RootState>(
       return
     }
 
-    if (isYMap(yJson) && isPlainObject(latestRedux)) {
-      patchYJson(yJson, latestRedux, { origin })
-    } else if (isYArray(yJson) && isPlainArray(latestRedux)) {
-      patchYJson(yJson, latestRedux, { origin })
-    } else {
-      throw new Error('Expected either a YArray and an array, or a YMap and an object')
-    }
+    patchYJson(yJson, latestRedux, { origin })
   }
 }
 

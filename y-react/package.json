@@ -14,11 +14,15 @@
     "build": "npm run build:cjs && npm run build:esm"
   },
   "devDependencies": {
+    "@sanalabs/y-json": "file:../y-json",
     "@types/react": "^17.0.30",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "react": "^17.0.2",
-    "yjs": "^13.5.16"
+    "yjs": "^13.5.23"
   },
   "peerDependencies": {
+    "@sanalabs/y-json": "*",
     "react": "*",
     "react-redux": "*",
     "yjs": "*"

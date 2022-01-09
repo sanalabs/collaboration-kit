@@ -74,16 +74,6 @@ type PatchYJsonOptions = {
  * Proper nesting of YMap and YArray is used for nested data.
  */
 export function patchYJson(
-  yTypeToMutate: Y.Map<unknown>,
-  newState: JsonTemplateObject,
-  options?: PatchYJsonOptions,
-): void
-export function patchYJson(
-  yTypeToMutate: Y.Array<unknown>,
-  newState: JsonTemplateArray,
-  options?: PatchYJsonOptions,
-): void
-export function patchYJson(
   yTypeToMutate: Y.Map<unknown> | Y.Array<unknown>,
   newState: JsonTemplateObject | JsonTemplateArray,
   options: PatchYJsonOptions = {},
@@ -98,7 +88,7 @@ export function patchYJson(
   const isYMapAndObject = isYMap(yTypeToMutate) && isPlainObject(newState)
 
   if (!isYArrayAndArray && !isYMapAndObject) {
-    throw new Error('Expected either a Y.Array and an Array, or a Y.Map and an object')
+    throw new Error('Expected either a YArray and an Array, or a YMap and an Object')
   }
 
   const oldState: unknown = yTypeToMutate.toJSON()
