@@ -4,7 +4,7 @@ import { JsonObject } from '../src'
 import { ArrayOperation, diff, ObjectOperation } from '../src/diff-json'
 import { arbitraryJSONArray, arbitraryJSONObject } from './utils'
 
-describe('patchYJson tests', () => {
+describe('diff tests', () => {
   it('diffing only yields a diff if objects are different', () => {
     fc.assert(
       fc.property(arbitraryJSONObject(), arbitraryJSONObject(), (left, right) => {
