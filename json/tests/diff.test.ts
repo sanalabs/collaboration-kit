@@ -1,27 +1,43 @@
 import * as fc from 'fast-check'
+import { Arbitrary } from 'fast-check'
 import _ from 'lodash'
-import { JsonObject } from '../src'
+import { JsonArray, JsonObject } from '../src'
 import { ArrayOperation, diff, ObjectOperation } from '../src/diff-json'
 import { arbitraryJSONArray, arbitraryJSONObject } from './utils'
 
+const twoDifferentArbitraryJSONObjects = (): Arbitrary<[JsonObject, JsonObject]> =>
+  fc.tuple(arbitraryJSONObject(), arbitraryJSONObject()).filter(([left, right]) => !_.isEqual(left, right))
+
+const twoDifferentArbitraryJSONArrays = (): Arbitrary<[JsonArray, JsonArray]> =>
+  fc.tuple(arbitraryJSONArray(), arbitraryJSONArray()).filter(([left, right]) => !_.isEqual(left, right))
+
 describe('diff tests', () => {
-  it('diffing only yields a diff if objects are different', () => {
+  it('diffing equivalent objects yields an empty diff', () => {
     fc.assert(
-      fc.property(arbitraryJSONObject(), arbitraryJSONObject(), (left, right) => {
-        const result = diff(left, right)
-        if (_.isEqual(left, right)) {
-          expect(result.operations.length).toEqual(0)
-        } else {
-          expect(result.operations.length).toBeGreaterThan(0)
-        }
+      fc.property(arbitraryJSONObject(), json => {
+        const result = diff(json, _.cloneDeep(json))
+        expect(result.operations.length).toEqual(0)
       }),
     )
     fc.assert(
-      fc.property(arbitraryJSONArray(), arbitraryJSONArray(), (left, right) => {
+      fc.property(arbitraryJSONArray(), json => {
+        const result = diff(json, _.cloneDeep(json))
+        expect(result.operations.length).toEqual(0)
+      }),
+    )
+  })
+
+  it('diffing non-equivalent objects yields a non-empty diff', () => {
+    fc.assert(
+      fc.property(twoDifferentArbitraryJSONObjects(), ([left, right]) => {
         const result = diff(left, right)
-        if (_.isEqual(left, right)) {
-          expect(result.operations.length).toEqual(0)
-        } else {
+        expect(result.operations.length).toBeGreaterThan(0)
+      }),
+    )
+    fc.assert(
+      fc.property(twoDifferentArbitraryJSONArrays(), ([left, right]) => {
+        const result = diff(left, right)
+        if (!_.isEqual(left, right)) {
           expect(result.operations.length).toBeGreaterThan(0)
         }
       }),
