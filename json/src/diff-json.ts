@@ -230,25 +230,27 @@ function diffObjects(
       continue
     }
     const newVal = newState[key]
-    const areValuesSameType =
-      (isPlainArray(oldVal) && isPlainArray(newVal)) || (isPlainObject(oldVal) && isPlainObject(newVal))
-    const isOldValDiffable = isPlainArray(oldVal) || isPlainObject(oldVal)
-    const isNewValDiffable = isPlainArray(newVal) || isPlainObject(newVal)
-    if (areValuesSameType && isOldValDiffable && isNewValDiffable) {
-      const childDiff = diff(oldVal, newVal, objectHashes)
-      if (childDiff.operations.length > 0) {
+    if (oldVal !== newVal) {
+      const areValuesSameType =
+        (isPlainArray(oldVal) && isPlainArray(newVal)) || (isPlainObject(oldVal) && isPlainObject(newVal))
+      const isOldValDiffable = isPlainArray(oldVal) || isPlainObject(oldVal)
+      const isNewValDiffable = isPlainArray(newVal) || isPlainObject(newVal)
+      if (areValuesSameType && isOldValDiffable && isNewValDiffable) {
+        const childDiff = diff(oldVal, newVal, objectHashes)
+        if (childDiff.operations.length > 0) {
+          operations.push({
+            operationType: OperationType.Nested,
+            key,
+            delta: childDiff,
+          })
+        }
+      } else {
         operations.push({
-          operationType: OperationType.Nested,
+          operationType: OperationType.Substitution,
           key,
-          delta: childDiff,
+          value: newVal,
         })
       }
-    } else {
-      operations.push({
-        operationType: OperationType.Substitution,
-        key,
-        value: newVal,
-      })
     }
   }
   for (const key in newState) {
