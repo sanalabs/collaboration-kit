@@ -14,7 +14,7 @@
     "ecmaFeatures": {
       "modules": true
     },
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.base.json"
   },
   "env": {
     "es6": true,

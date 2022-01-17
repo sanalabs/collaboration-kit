@@ -1,0 +1,23 @@
+{
+  "name": "@sanalabs/json",
+  "version": "0.1.7",
+  "description": "Utility functions to validate and mutate JSON (patch and merge)",
+  "license": "ISC",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build:cjs": "rm -rf dict/cjs && npx tsc --outDir dist/cjs --module commonjs",
+    "build:esm": "rm -rf dist/esm && npx tsc --outDir dist/esm --module esnext",
+    "build": "yarn run build:cjs && yarn run build:esm"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.177",
+    "fast-check": "^2.19.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}

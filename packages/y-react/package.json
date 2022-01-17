@@ -1,0 +1,33 @@
+{
+  "name": "@sanalabs/y-react",
+  "version": "0.1.0",
+  "description": "React state synced with Yjs",
+  "license": "ISC",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build:cjs": "rm -rf dict/cjs && tsc --outDir dist/cjs --module commonjs",
+    "build:esm": "rm -rf dist/esm && tsc --outDir dist/esm --module esnext",
+    "build": "npm run build:cjs && npm run build:esm"
+  },
+  "devDependencies": {
+    "@sanalabs/y-json": "workspace:*",
+    "@types/react": "^17.0.30",
+    "eslint": "^8.7.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "react": "^17.0.2",
+    "yjs": "^13.5.23"
+  },
+  "dependencies": {
+    "@sanalabs/y-json": "*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-redux": "*",
+    "yjs": "*"
+  }
+}
