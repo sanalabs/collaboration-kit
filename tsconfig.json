@@ -1,24 +1,10 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "strict": true,
-    "alwaysStrict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "declaration": true,
-    "declarationMap": true,
-    "forceConsistentCasingInFileNames": true,
-    "noUncheckedIndexedAccess": true,
-    "downlevelIteration": true,
-    "exactOptionalPropertyTypes": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "lib": ["es2017", "DOM"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "isolatedModules": true,
-    "jsx": "react"
-  }
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/json" },
+    { "path": "./packages/y-json" },
+    { "path": "./packages/y-react" },
+    { "path": "./packages/y-redux" }
+  ]
 }

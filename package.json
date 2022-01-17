@@ -1,30 +1,24 @@
 {
+  "name": "collaboration-kit",
+  "packageManager": "yarn@3.1.1",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "setup:dev": "npm i && npm i --prefix json && npm i --prefix y-json && npm i --prefix y-react && npm i --prefix y-redux && npm i --prefix examples/react-example",
-    "setup:ci": "npm ci && npm ci --prefix json && npm ci --prefix y-json && npm ci --prefix y-react && npm ci --prefix y-redux && npm ci --prefix examples/react-example",
-    "setup:prod": "npm ci && npm ci --prefix json --only=prod && npm ci --prefix y-json --only=prod && npm ci --prefix y-react --only=prod && npm ci --prefix y-redux --only=prod",
     "clean:node_modules": "rm -rf */node_modules",
     "clean:dist": "rm -rf */dist",
-    "clean": "npm run clean:node_modules && npm run clean:dist",
-    "check": "npm run check:ts && npm run check:format && npm run check:lint",
-    "check:format": "prettier --check .",
-    "check:lint": "eslint json y-json y-redux y-react",
-    "check:ts": "tsc --project tsconfig.json --noEmit",
+    "clean": "yarn run clean:node_modules && yarn run clean:dist",
+    "check": "yarn run check:ts && yarn run check:format && yarn run check:lint",
+    "check:format": "prettier --check packages *.md",
+    "check:lint": "eslint packages",
+    "check:ts": "tsc --project packages/json --project packages/y-json --project packages/y-react --project packages/y-redux --noEmit",
     "test": "jest",
-    "test:json": "jest --roots=json",
-    "test:y-json": "jest --roots=y-json",
-    "build:json": "npm i --prefix json && npm run --prefix json build",
-    "build:y-react": "npm i --prefix y-react && npm run --prefix y-react build",
-    "build:y-json": "npm i --prefix y-json && npm run --prefix y-json build:example",
-    "build:y-redux": "npm i --prefix y-redux && npm run --prefix y-redux build:example",
-    "build:react-example": "npm i --prefix examples/react-example && npm run --prefix examples/react-example build",
-    "build:all": "npm i && npm run build:json && npm run build:y-react && npm run build:y-json && npm run build:y-redux && npm run build:react-example",
-    "build:netlify": "npm run build:all",
-    "dev:example": "npm run build:all && rm -rf y-json/node_modules && rm -rf y-redux/node_modules && npm run --prefix examples/react-example start"
+    "build": "yarn workspaces foreach -ipv --topological-dev run build"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.9.1",
     "eslint": "^8.0.1",
     "eslint-plugin-import": "^2.25.2",
     "jest": "^27.3.1",
