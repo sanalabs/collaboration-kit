@@ -53,7 +53,7 @@ const DispatchMessages: React.VFC = () => {
       counterRef.current++
       dispatch({ type: 'send-message', message: counterRef.current })
     }
-    setInterval(() => send(), 10)
+    setInterval(() => send())
   }, [status, dispatch])
 
   return null
@@ -76,7 +76,7 @@ const ToggleBoolean: React.VFC = () => {
       } else {
         count++
       }
-    }, 5)
+    })
   }, [status, dispatch])
 
   return null
