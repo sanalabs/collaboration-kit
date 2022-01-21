@@ -116,9 +116,12 @@ const assertEndStates = ({ stores }: { stores: Store<State, Action>[] }): void =
     // Each `messages` array should be the list [1, 2, 3, ..., messages.length + 1]
     expect(messages).toEqual(_.range(1, messages!.length + 1))
 
-    // All the messages across all the stores should be in sync
+    // Each `messages` array should have at least 5 elements, otherwise the test setup is probably wrong
+    expect(messages!.length).toBeGreaterThan(4)
+
+    // Ensure that all of the stores are in sync
     for (const otherStore of stores) {
-      expect(messages).toEqual(selectMessages(otherStore.getState()))
+      expect(store.getState()).toEqual(otherStore.getState())
     }
   }
 }
