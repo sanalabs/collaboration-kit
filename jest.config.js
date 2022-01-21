@@ -5,9 +5,9 @@
 
 module.exports = {
   transform: {
-    '^.+\\.ts?$': 'ts-jest',
+    '^.+\\.tsx?$': 'ts-jest',
   },
-  testRegex: '.*\\.test\\.ts$',
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  testRegex: '.*\\.test\\.tsx?$',
+  moduleFileExtensions: ['js', 'json', 'jsx', 'ts', 'tsx', 'node'],
   clearMocks: true,
 }

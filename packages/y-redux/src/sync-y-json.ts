@@ -1,27 +1,19 @@
 import { JsonTemplateArray, JsonTemplateContainer, JsonTemplateObject } from '@sanalabs/json'
 import { patchYJson } from '@sanalabs/y-json'
 import _ from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector, useStore } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useDispatch, useStore } from 'react-redux'
 import { Store } from 'redux'
 import * as Y from 'yjs'
 
-function sendChanges<T extends JsonTemplateContainer, RootState>(
+function handleChange<T extends JsonTemplateContainer, RootState>(
+  source: 'local' | 'remote',
   store: Store,
   selectData: (state: RootState) => T | undefined,
+  setData: (data: T) => any,
   yJson: Y.Map<unknown> | Y.Array<unknown>,
-  origin: { origin: string },
-) {
-  return () => {
-    // This hook patches the latest Redux data into the yDoc.
-    // Note: this hook is triggered whenever the selector changes, and this selector
-    // may update faster than this component can render. In such a case, there would be
-    // a queue of states that would be patched into the yDoc. All of these states
-    // (except the very latest) would be out of sync with the yDoc, and patching them in
-    // would cause the old states to be redistributed to the other clients. In some cases
-    // (especially with lots of state updates and  many clients), this would lead to infinite
-    // loops which would crash the browser entirely. To fix this, we need to ensure that we
-    // always patch the latest state from the Redux store into the yDoc.
+): void {
+  const syncLocalIntoRemote = (): void => {
     const latestRedux = selectData(store.getState() as RootState)
     if (latestRedux === undefined) {
       console.debug(
@@ -29,8 +21,28 @@ function sendChanges<T extends JsonTemplateContainer, RootState>(
       )
       return
     }
-
     patchYJson(yJson, latestRedux, { origin })
+  }
+
+  const syncRemoteIntoLocal = (): void => {
+    const remoteData: unknown = yJson.toJSON()
+    const localData = selectData(store.getState() as RootState)
+    if (_.isEqual(remoteData, localData)) {
+      console.debug('[SyncYJson] remote data unchanged')
+      return
+    }
+
+    console.debug('[SyncYJson] remote data changed')
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    store.dispatch(setData(remoteData as any))
+  }
+
+  if (source === 'local') {
+    syncLocalIntoRemote()
+    syncRemoteIntoLocal()
+  } else {
+    syncRemoteIntoLocal()
+    syncLocalIntoRemote()
   }
 }
 
@@ -38,90 +50,63 @@ export function SyncYJson<T extends JsonTemplateObject, RootState>(props: {
   yJson: Y.Map<unknown>
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
-  throttleReceiveMs?: number
-  throttleSendMs?: number
 }): null
 export function SyncYJson<T extends JsonTemplateArray, RootState>(props: {
   yJson: Y.Array<unknown>
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
-  throttleReceiveMs?: number
-  throttleSendMs?: number
 }): null
 export function SyncYJson<T extends JsonTemplateContainer, RootState>({
   yJson,
   setData,
   selectData,
-  throttleReceiveMs = 200,
-  throttleSendMs = 200,
 }: {
   yJson: Y.Map<unknown> | Y.Array<unknown>
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
-  throttleReceiveMs?: number
-  throttleSendMs?: number
 }): null {
   const dispatch = useDispatch()
-  const localData = useSelector(selectData)
   const store = useStore()
-
-  useEffect(() => {
-    console.debug('[SyncYJson] start')
-  }, [])
-
-  useEffect(() => {
-    console.debug('[SyncYJson] store changed')
-  }, [store])
 
   // The origin of the yjs transactions committed by collaboration-kit
   // For context see: https://discuss.yjs.dev/t/determining-whether-a-transaction-is-local/361/3
   const [origin] = useState<string>(() => `collaboration-kit:sync:${Math.random()}`)
 
-  const throttledSendChanges = useMemo(
-    () => _.throttle(sendChanges(store, selectData, yJson, { origin }), throttleSendMs),
-    [store, selectData, yJson, origin, throttleSendMs],
-  )
-
-  // Send changes whenever our local data changes
-  useEffect(throttledSendChanges, [localData])
-
-  useEffect(() => () => throttledSendChanges.flush(), [])
-
   useEffect(() => {
-    const handler = (): void => {
-      const newData = yJson.toJSON() as T
+    // Sync the current local state up to this point
+    handleChange('local', store, selectData, setData, yJson)
 
-      if (_.isEqual(newData, {})) {
-        // yJson is empty and most likely not yet synced
-        return
+    // Use store.subscribe to ensure we get synchronous updates. We cannot use `useSelector`, since that would
+    // tie the updates to the react lifecycle, which may allow `yJson` to update before we push our changes.
+    let stateCache: unknown = undefined
+    const unsubscribe = store.subscribe(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-unsafe-argument
+      const newState = selectData(store.getState() as any)
+      if (stateCache !== newState) {
+        handleChange('local', store, selectData, setData, yJson)
+        stateCache = newState
       }
-
-      const latestReduxData = selectData(store.getState() as RootState)
-
-      if (_.isEqual(newData, latestReduxData)) {
-        console.debug('[SyncYJson] remote data unchanged')
-        return
-      }
-
-      console.debug('[SyncYJson] remote data changed')
-      dispatch(setData(newData))
-    }
-
-    handler() // Run once on setup
-
-    const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
-      if (transaction.origin === origin) return
-      handler()
-    }
-
-    const throttledObserver = _.throttle(observer, throttleReceiveMs)
-    yJson.observeDeep(throttledObserver)
+    })
 
     return () => {
-      throttledObserver.flush()
-      yJson.unobserveDeep(throttledObserver)
+      // Explictly wrap this function call to avoid potential scoping bugs
+      unsubscribe()
     }
-  }, [yJson, dispatch, setData, store, origin, throttleReceiveMs])
+  }, [selectData, setData, store, yJson])
+
+  useEffect(() => {
+    const observer = (ignore: Array<Y.YEvent>, transaction: Y.Transaction): void => {
+      if (transaction.origin === origin) return
+
+      handleChange('remote', store, selectData, setData, yJson)
+    }
+
+    yJson.observeDeep(observer)
+
+    return () => {
+      yJson.unobserveDeep(observer)
+    }
+  }, [yJson, dispatch, setData, store, origin, selectData])
 
   return null
 }
