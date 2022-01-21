@@ -73,8 +73,6 @@ export function SyncYJson<T extends JsonTemplateContainer, RootState>({
   const [origin] = useState<string>(() => `collaboration-kit:sync:${Math.random()}`)
 
   useEffect(() => {
-    console.log('Subscribing to store')
-
     // Sync the current local state up to this point
     handleChange('local', store, selectData, setData, yJson)
 
@@ -82,7 +80,7 @@ export function SyncYJson<T extends JsonTemplateContainer, RootState>({
     // tie the updates to the react lifecycle, which may allow `yJson` to update before we push our changes.
     let stateCache: unknown = undefined
     const unsubscribe = store.subscribe(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-unsafe-argument
       const newState = selectData(store.getState() as any)
       if (stateCache !== newState) {
         handleChange('local', store, selectData, setData, yJson)
@@ -91,13 +89,13 @@ export function SyncYJson<T extends JsonTemplateContainer, RootState>({
     })
 
     return () => {
-      console.log('Unsubscribing from store')
+      // Explictly wrap this function call to avoid potential scoping bugs
       unsubscribe()
     }
   }, [selectData, setData, store, yJson])
 
   useEffect(() => {
-    const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
+    const observer = (ignore: Array<Y.YEvent>, transaction: Y.Transaction): void => {
       if (transaction.origin === origin) return
 
       handleChange('remote', store, selectData, setData, yJson)

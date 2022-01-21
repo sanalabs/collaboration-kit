@@ -4,20 +4,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { patchYJson } from '@sanalabs/y-json'
 import '@testing-library/jest-dom'
-import { render } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import _ from 'lodash'
-import React, { useEffect, useRef } from 'react'
-import { Provider, useDispatch, useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { Provider, useDispatch, useSelector, useStore } from 'react-redux'
 import { createStore, Store } from 'redux'
 import * as Y from 'yjs'
 import { SyncYJson } from '../src/sync-y-json'
 
-type Data = { bool: boolean; messages: number[] }
+type Data = { messages: number[]; count: number }
 
 type State = { status: 'loading' } | { status: 'loaded'; data: Data }
 
 type Action =
-  | { type: 'toggle-bool' }
+  | { type: 'increment'; expectedCount: number }
   | { type: 'send-message'; message: number }
   | { type: 'set-data'; data: Data }
 
@@ -25,13 +25,27 @@ const reducer = (state: State = { status: 'loading' }, action: Action): State =>
   switch (action.type) {
     case 'set-data':
       return { status: 'loaded', data: action.data }
-    case 'toggle-bool': {
-      if (state.status !== 'loaded') throw new Error('Expected data to be laoded')
-      return { ...state, data: { ...state.data, bool: !state.data.bool } }
+    case 'increment': {
+      if (state.status !== 'loaded') throw new Error('Expected data to be loaded')
+
+      const newState = { ...state, data: { ...state.data, count: state.data.count + 1 } }
+
+      expect(newState.data.count).toEqual(action.expectedCount)
+
+      return newState
     }
-    case 'send-message':
-      if (state.status !== 'loaded') throw new Error('Expected data to be laoded')
-      return { ...state, data: { ...state.data, messages: [...state.data.messages, action.message] } }
+    case 'send-message': {
+      if (state.status !== 'loaded') throw new Error('Expected data to be loaded')
+
+      const newState = {
+        ...state,
+        data: { ...state.data, messages: [...state.data.messages, action.message] },
+      }
+
+      expect(state.data.messages).toEqual(_.range(1, action.message))
+
+      return newState
+    }
     default:
       return state
   }
@@ -40,54 +54,60 @@ const reducer = (state: State = { status: 'loading' }, action: Action): State =>
 const selectStatus = (state: State): State['status'] => state.status
 const selectData = (state: State): Data | undefined => (state.status === 'loaded' ? state.data : undefined)
 const selectMessages = (state: State): number[] | undefined => selectData(state)?.messages
+const selectCount = (state: State): number | undefined => selectData(state)?.count
 
+/**
+ * This appends the messages 1, 2, 3, ..., 100 to the state.data.messages array, one element at a time.
+ */
 const DispatchMessages: React.VFC = () => {
   const dispatch = useDispatch()
-  const counterRef = useRef(0)
   const status = useSelector(selectStatus)
+  const store = useStore()
 
   useEffect(() => {
     if (status !== 'loaded') return
 
-    const send = (): void => {
-      counterRef.current++
-      dispatch({ type: 'send-message', message: counterRef.current })
-    }
-    setInterval(() => send())
-  }, [status, dispatch])
-
-  return null
-}
-
-const ToggleBoolean: React.VFC = () => {
-  const dispatch = useDispatch()
-  const status = useSelector(selectStatus)
-
-  useEffect(() => {
-    let count = 0
-    if (status !== 'loaded') return
-
-    const send = (): Action => dispatch({ type: 'toggle-bool' })
-
+    let count = 1
     const interval = setInterval(() => {
-      send()
-      if (count === 100) {
+      dispatch({ type: 'send-message', message: count })
+      count++
+      if (count > 100) {
         clearInterval(interval)
-      } else {
-        count++
       }
     })
-  }, [status, dispatch])
+    return () => clearInterval(interval)
+  }, [status, dispatch, store])
 
   return null
 }
 
-const App: React.FC<{
+/**
+ * This increments the state.data.count counter from 0 upwards until the test has ended.
+ */
+const IncrementCounter: React.VFC = () => {
+  const dispatch = useDispatch()
+  const status = useSelector(selectStatus)
+  const store = useStore()
+
+  useEffect(() => {
+    if (status !== 'loaded') return
+
+    let count = 0
+    const interval = setInterval(() => {
+      dispatch({ type: 'increment', expectedCount: count + 1 })
+      count++
+    })
+    return () => clearInterval(interval)
+  }, [status, dispatch, store])
+
+  return null
+}
+
+const SyncStore: React.FC<{
   store: Store<State, Action>
   yJson: Y.Map<unknown>
 }> = ({ store, yJson, children }) => (
   <Provider store={store}>
-    <h1>Hello, World!</h1>
     <SyncYJson
       yJson={yJson}
       setData={(data: Data): Action => ({ type: 'set-data', data })}
@@ -97,42 +117,9 @@ const App: React.FC<{
   </Provider>
 )
 
-// const wait = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
-
 beforeEach(() => {
   jest.spyOn(console, 'debug').mockImplementation(() => {})
 })
-
-const assertEndStates = ({ stores }: { stores: Store<State, Action>[] }): void => {
-  console.log(
-    'FINISHED WITH STATES:',
-    stores.map(it => selectData(it.getState())?.messages),
-  )
-
-  for (const store of stores) {
-    const messages = selectMessages(store.getState())
-    expect(messages).toBeDefined()
-
-    // Each `messages` array should be the list [1, 2, 3, ..., messages.length + 1]
-    expect(messages).toEqual(_.range(1, messages!.length + 1))
-
-    // Each `messages` array should have at least 5 elements, otherwise the test setup is probably wrong
-    expect(messages!.length).toBeGreaterThan(4)
-
-    // Ensure that all of the stores are in sync
-    for (const otherStore of stores) {
-      expect(store.getState()).toEqual(otherStore.getState())
-    }
-  }
-}
-
-const waitUntilFinished = ({ stores }: { stores: Store<State, Action>[] }): Promise<void> =>
-  new Promise(res => {
-    setTimeout(() => {
-      res()
-      assertEndStates({ stores })
-    }, 1000)
-  })
 
 test('sync', async () => {
   const store1 = createStore(reducer)
@@ -141,27 +128,30 @@ test('sync', async () => {
   // TODO: Simulate server and two clients, all synced with a provider
   const yDoc1 = new Y.Doc()
   const yMap1 = yDoc1.getMap()
-  patchYJson(yMap1, { bool: false, messages: [] })
+  patchYJson(yMap1, { count: 0, messages: [] })
 
+  // We are simulating two clients. One client addds messages to an array of messages and the other increments
+  // a counter. These are modifying separate parts of the state, so they should both see a consistent view of
+  // their respective parts of the state throughout the test. At the end of the test, both of their redux stores
+  // should be in sync.
   render(
-    <App store={store1} yJson={yMap1}>
+    <SyncStore store={store1} yJson={yMap1}>
       <DispatchMessages />
-    </App>,
+    </SyncStore>,
   )
   render(
-    <App store={store2} yJson={yMap1}>
-      <ToggleBoolean />
-    </App>,
+    <SyncStore store={store2} yJson={yMap1}>
+      <IncrementCounter />
+    </SyncStore>,
   )
 
-  console.log('STORE CHECK')
-  console.log(store1.getState())
-  console.log(store2.getState())
-  expect(store1.getState()).toEqual(store2.getState())
-
-  expect(selectData(store1.getState())).not.toBe(undefined)
-  expect(selectData(store1.getState())).toEqual(selectData(store2.getState()))
-  expect(selectData(store1.getState())).toEqual(yMap1.toJSON())
-
-  return waitUntilFinished({ stores: [store1, store2] })
+  await waitFor(() => {
+    // The test is finished when:
+    // 1. state.data.messages contains the numbers 1 to 100 in order
+    // 2. state.data.count has been incremented some number of times
+    // 3. store1 and store2 are in fully in sync
+    expect(selectMessages(store1.getState())).toEqual(_.range(1, 101))
+    expect(selectCount(store1.getState())).toBeGreaterThan(0)
+    expect(store1.getState()).toEqual(store2.getState())
+  })
 })
