@@ -14,27 +14,26 @@ function handleChange<T extends JsonTemplateContainer, RootState>(
   yJson: Y.Map<unknown> | Y.Array<unknown>,
 ): void {
   const syncLocalIntoRemote = (): void => {
-    const latestRedux = selectData(store.getState() as RootState)
-    if (latestRedux === undefined) {
-      console.debug(
-        '[SyncYJson] Redux data returned undefined. The data has most likely not been synced with the other clients yet.',
-      )
+    const localData = selectData(store.getState() as RootState)
+    if (localData === undefined) {
+      console.debug('[SyncYJson:syncLocalIntoRemote] Not syncing: Local data is undefined')
       return
     }
-    patchYJson(yJson, latestRedux, { origin })
+
+    console.debug('[SyncYJson:syncLocalIntoRemote] Syncing')
+    patchYJson(yJson, localData, { origin })
   }
 
   const syncRemoteIntoLocal = (): void => {
     const remoteData: unknown = yJson.toJSON()
     const localData = selectData(store.getState() as RootState)
     if (_.isEqual(remoteData, localData)) {
-      console.debug('[SyncYJson] remote data unchanged')
+      console.debug('[SyncYJson:syncRemoteIntoLocal] Not syncing: Remote already equals local data')
       return
     }
 
-    console.debug('[SyncYJson] remote data changed')
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    store.dispatch(setData(remoteData as any))
+    console.debug('[SyncYJson:syncRemoteIntoLocal] Syncing')
+    store.dispatch(setData(remoteData as T))
   }
 
   if (source === 'local') {
