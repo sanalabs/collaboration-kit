@@ -2,9 +2,10 @@ import { JsonTemplateArray, JsonTemplateContainer, JsonTemplateObject } from '@s
 import { patchYJson } from '@sanalabs/y-json'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
-import { useDispatch, useStore } from 'react-redux'
+import { useStore } from 'react-redux'
 import { Store } from 'redux'
 import * as Y from 'yjs'
+import { cachedSubscribe } from './redux-subscriber'
 
 function handleChange<T extends JsonTemplateContainer, RootState>(
   source: 'local' | 'remote',
@@ -64,39 +65,30 @@ export function SyncYJson<T extends JsonTemplateContainer, RootState>({
   setData: (data: T) => any
   selectData: (state: RootState) => T | undefined
 }): null {
-  const dispatch = useDispatch()
   const store = useStore()
 
   // The origin of the yjs transactions committed by collaboration-kit
   // For context see: https://discuss.yjs.dev/t/determining-whether-a-transaction-is-local/361/3
   const [origin] = useState<string>(() => `collaboration-kit:sync:${Math.random()}`)
 
+  // On mount sync remote into local
   useEffect(() => {
-    // Sync the current local state up to this point
-    handleChange('local', store, selectData, setData, yJson)
+    handleChange('remote', store, selectData, setData, yJson)
+  }, [store, selectData, setData, yJson])
 
-    // Use store.subscribe to ensure we get synchronous updates. We cannot use `useSelector`, since that would
-    // tie the updates to the react lifecycle, which may allow `yJson` to update before we push our changes.
-    let stateCache: unknown = undefined
-    const unsubscribe = store.subscribe(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-unsafe-argument
-      const newState = selectData(store.getState() as any)
-      if (stateCache !== newState) {
-        handleChange('local', store, selectData, setData, yJson)
-        stateCache = newState
-      }
+  // Subscribe to local changes
+  useEffect(() => {
+    const unsubscribe = cachedSubscribe(store, selectData, () => {
+      handleChange('local', store, selectData, setData, yJson)
     })
 
-    return () => {
-      // Explictly wrap this function call to avoid potential scoping bugs
-      unsubscribe()
-    }
-  }, [selectData, setData, store, yJson])
+    return () => unsubscribe()
+  }, [store, selectData, setData, yJson])
 
+  // Subscribe to remote changes
   useEffect(() => {
-    const observer = (ignore: Array<Y.YEvent>, transaction: Y.Transaction): void => {
+    const observer = (events: Array<Y.YEvent>, transaction: Y.Transaction): void => {
       if (transaction.origin === origin) return
-
       handleChange('remote', store, selectData, setData, yJson)
     }
 
@@ -105,7 +97,7 @@ export function SyncYJson<T extends JsonTemplateContainer, RootState>({
     return () => {
       yJson.unobserveDeep(observer)
     }
-  }, [yJson, dispatch, setData, store, origin, selectData])
+  }, [origin, store, selectData, setData, yJson])
 
   return null
 }
