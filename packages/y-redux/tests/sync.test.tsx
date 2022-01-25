@@ -1,7 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { patchYJson } from '@sanalabs/y-json'
 import '@testing-library/jest-dom'
 import { render, waitFor } from '@testing-library/react'
@@ -58,8 +57,11 @@ const selectData = (state: State): Data | undefined => (state.status === 'loaded
 const selectMessages = (state: State): number[] | undefined => selectData(state)?.messages
 const selectCount = (state: State): number | undefined => selectData(state)?.count
 
+const startCount = 1
+const endCount = 100
+
 /**
- * This appends the messages 1, 2, 3, ..., 100 to the state.data.messages array, one element at a time.
+ * This appends the messages 1, 2, 3, ..., endCount to the state.data.messages array, one element at a time.
  */
 const DispatchMessages: React.VFC = () => {
   const dispatch = useDispatch()
@@ -69,11 +71,11 @@ const DispatchMessages: React.VFC = () => {
   useEffect(() => {
     if (status !== 'loaded') return
 
-    let count = 1
+    let count = startCount
     const interval = setInterval(() => {
       dispatch({ type: 'send-message', message: count })
       count++
-      if (count > 100) {
+      if (count >= endCount) {
         clearInterval(interval)
       }
     })
@@ -152,7 +154,7 @@ test('sync', async () => {
     // 1. state.data.messages contains the numbers 1 to 100 in order
     // 2. state.data.count has been incremented some number of times
     // 3. store1 and store2 are in fully in sync
-    expect(selectMessages(store1.getState())).toEqual(_.range(1, 101))
+    expect(selectMessages(store1.getState())).toEqual(_.range(startCount, endCount))
     expect(selectCount(store1.getState())).toBeGreaterThan(0)
     expect(store1.getState()).toEqual(store2.getState())
   })

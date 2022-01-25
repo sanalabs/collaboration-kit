@@ -1,92 +1,86 @@
 import { JsonObject } from '@sanalabs/json'
 import _ from 'lodash'
-import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector, useStore } from 'react-redux'
+import { useEffect } from 'react'
+import { useStore } from 'react-redux'
 import { AnyAction, Store } from 'redux'
 import { Awareness } from 'y-protocols/awareness.js'
+import { cachedSubscribe } from './redux-subscriber'
 
 export type BaseAwarenessState = {
   clientId: number
   isCurrentClient: boolean
 }
 
-function sendLocalAwarenessState<T extends JsonObject>(
-  awareness: Awareness,
-  selectLocalAwarenessState: (state: any) => T | undefined,
-  store: Store<any, AnyAction>,
-  localAwarenessState: T | undefined,
-) {
-  return () => {
-    const latestReduxAwareness = selectLocalAwarenessState(store.getState())
-    if (latestReduxAwareness === undefined) return
-    if (!_.isEqual(latestReduxAwareness, localAwarenessState)) {
-      console.debug(
-        '[SyncYAwareness] Data Race prevented. SyncYAwareness will read the latest state from Redux directly.',
-      )
-    }
-    awareness.setLocalState(latestReduxAwareness)
+const syncLocalIntoRemote = <T extends JsonObject>(awareness: Awareness, data: T | undefined): void => {
+  if (data === undefined) {
+    console.debug('[SyncYAwareness:syncLocalIntoRemote] Not syncing: Local data is undefined')
+    return
   }
+
+  console.debug('[SyncYAwareness:syncLocalIntoRemote] Syncing')
+  awareness.setLocalState(data)
+}
+
+const syncRemoteIntoLocal = <T extends JsonObject>(
+  awareness: Awareness,
+  store: Store<any, AnyAction>,
+  selectLocalAwarenessState: (state: any) => T | undefined,
+  setAwarenessStates: (awarenessStates: (BaseAwarenessState & T)[]) => AnyAction,
+): void => {
+  const stateEntries = [...awareness.getStates().entries()]
+  const states = stateEntries.map(([clientId, state]) => ({
+    ...state,
+    clientId,
+    isCurrentClient: awareness.clientID === clientId,
+  })) as (BaseAwarenessState & T)[]
+
+  const latestReduxAwareness = selectLocalAwarenessState(store.getState())
+  if (_.isEqual(states, latestReduxAwareness)) {
+    console.debug('[SyncYAwareness:syncRemoteIntoLocal] Not syncing: Remote already equals local data')
+    return
+  }
+
+  console.debug('[SyncYAwareness:syncRemoteIntoLocal] Syncing')
+  store.dispatch(setAwarenessStates(states))
 }
 
 export const SyncYAwareness = <T extends JsonObject>({
   awareness,
   setAwarenessStates,
   selectLocalAwarenessState,
-  throttleReceiveMs = 200,
-  throttleSendMs = 200,
 }: {
   awareness: Awareness
-  setAwarenessStates: (awarenessStates: (BaseAwarenessState & T)[]) => void
+  setAwarenessStates: (awarenessStates: (BaseAwarenessState & T)[]) => AnyAction
   selectLocalAwarenessState: (state: any) => T | undefined
-  throttleReceiveMs?: number
-  throttleSendMs?: number
 }): null => {
-  const dispatch = useDispatch()
-  const localAwarenessState = useSelector(selectLocalAwarenessState)
   const store = useStore()
 
-  const throttledSendChanges = useMemo(
-    () =>
-      _.throttle(
-        sendLocalAwarenessState(awareness, selectLocalAwarenessState, store, localAwarenessState),
-        throttleSendMs,
-      ),
-    [awareness, selectLocalAwarenessState, store, localAwarenessState, throttleSendMs],
-  )
-
-  // Send changes whenever our local data changes
-  useEffect(throttledSendChanges, [localAwarenessState])
-
-  useEffect(() => () => throttledSendChanges.flush(), [])
-
+  // On mount sync remote into local
   useEffect(() => {
-    const handler = (): void => {
-      const stateEntries = [...awareness.getStates().entries()]
-      const states = stateEntries.map(([clientId, state]) => ({
-        ...state,
-        clientId,
-        isCurrentClient: awareness.clientID === clientId,
-      })) as (BaseAwarenessState & T)[]
+    syncRemoteIntoLocal(awareness, store, selectLocalAwarenessState, setAwarenessStates)
+  }, [awareness, selectLocalAwarenessState, setAwarenessStates, store])
 
-      const latestReduxAwareness = selectLocalAwarenessState(store.getState())
-      if (_.isEqual(states, latestReduxAwareness)) {
-        console.debug('[SyncYAwareness] remote data unchanged')
-        return
-      }
+  // Subscribe to local changes
+  useEffect(() => {
+    const unsubscribe = cachedSubscribe(store, selectLocalAwarenessState, data =>
+      syncLocalIntoRemote(awareness, data),
+    )
 
-      dispatch(setAwarenessStates(states))
+    return () => unsubscribe()
+  }, [awareness, store, selectLocalAwarenessState])
+
+  // Subscribe to remote changes
+  useEffect(() => {
+    const observer = (): void => {
+      syncRemoteIntoLocal(awareness, store, selectLocalAwarenessState, setAwarenessStates)
     }
 
-    handler() // Run once on setup
-
-    const throttledHandler = _.throttle(handler, throttleReceiveMs)
-    awareness.on('change', throttledHandler)
+    awareness.on('change', observer)
 
     return () => {
-      awareness.off('change', throttledHandler)
-      throttledHandler.flush()
+      awareness.off('change', observer)
     }
-  }, [awareness, dispatch, setAwarenessStates])
+  }, [awareness, selectLocalAwarenessState, setAwarenessStates, store])
 
   return null
 }
