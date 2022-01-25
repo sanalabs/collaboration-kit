@@ -14,7 +14,6 @@ This package exports two React components:
 - [FAQ](#faq)
   - [Why is SyncYJson a component and not a hook?](#why-is-syncyjson-a-component-and-not-a-hook)
   - [Why is SyncYJson a React component and not a more generic Redux integration?](#why-is-syncyjson-a-react-component-and-not-a-more-generic-redux-integration)
-  - [Why does SyncYJson throttle the updates?](#why-does-syncyjson-throttle-the-updates)
 
 ## `SyncYJson`
 
@@ -25,7 +24,7 @@ This is a two-way synchronization of a Redux state and a YMap/YArray. When `Sync
 
 The YType can be a deep structure containing YMaps, YArrays and JSON primitives.
 
-The Yjs mutations are batched into a transaction. Writes in both directions (Redux and Yjs) are throttled for performance (and is configurable).
+The Yjs mutations are batched into a transaction.
 
 ### Retaining referential equality whenever possible
 
@@ -37,7 +36,7 @@ Retaining object references for parts of the state that didn't change is importa
 ### Usage example
 
 ```tsx
-export const SyncData = () => {
+export const App = () => {
   const { yMap, yProvider } = useMemo(() => {
     const yProvider = new YjsProvider() // Eg. HocuspocusProvider or WebrtcProvider
     const yMap = yProvider.document.getMap('data')
@@ -48,17 +47,19 @@ export const SyncData = () => {
     () => () => {
       yProvider.destroy()
     },
-    [yProvider],
+    [yProvider]
   )
 
   return (
     <SyncYJson
-      yMap={yMap} // YMap to be observed for remote changes by yMap.observeDeep()
+      yMap={yMap} // YMap to be observed for remote changes by yMap.observeDeep
       setData={setData} // Action creator to be called as dispatch(setData(data))
       selectData={selectData} // Selector to be used as useSelector(selectData)
-      throttleReceiveMs={200} // Optional, defaults to 200, pending updates are batched
-      throttleSendMs={200} // Optional, defaults to 200, pending updates are batched
     />
+
+    // Inside other components you can interact with the synced data as with any normal
+    // Redux state by using dispatch and useSelector and it will be seamlessly kept in sync.
+    <OtherComponent />
   )
 }
 ```
@@ -76,16 +77,9 @@ For performance and convenience. It makes no difference to the consumer of this 
 
 The performance issue with hooks is that any time an effect within a hook runs, that triggers a re-render of
 the surrounding component. Since the hooks within `SyncYJson` may trigger very often due to remote changes we
-noticed that it was confusing and not convenient to have the functionality as a hook.
+noticed that it was not convenient to have the functionality as a hook.
 
 ### Why is `SyncYJson` a React component and not a more generic Redux integration?
 
 Having this logic as a first class citizen in React makes it easy to control when to use SyncYJson
 and to have multiple instances for different parts of your application.
-
-### Why does `SyncYJson` throttle the updates?
-
-For performance. Note that it's easy to opt out by setting the throttle to 0, but you probably
-want to throttle. Throttling is useful because you probably re-render based on the updates, and it makes no
-sense to render instantly if the remote changes are very frequent (due to many users modifying the state) and
-there is already delay due to network. The throttling implicitly creates a batching of all the updates.
