@@ -2,15 +2,13 @@
 
 Monorepo for packages that facilitate working with arbitrary JSON structures in [Yjs](https://github.com/yjs/yjs).
 
-<!-- - `@sanalabs/y-react` Two-way sync of React state and Yjs -->
-
-- [`@sanalabs/y-redux`](https://github.com/sanalabs/collaboration-kit/tree/main/y-redux) Two-way sync of Redux and Yjs
-- [`@sanalabs/y-json`](https://github.com/sanalabs/collaboration-kit/tree/main/y-json) Utility functions to mutate Yjs types according to a target JSON object
-- [`@sanalabs/json`](https://github.com/sanalabs/collaboration-kit/tree/main/json) Utility functions to mutate, validate and diff JSON objects
+- [`@sanalabs/y-redux`](https://github.com/sanalabs/collaboration-kit/tree/main/packages/y-redux) Two-way sync of Redux and Yjs
+- [`@sanalabs/y-json`](https://github.com/sanalabs/collaboration-kit/tree/main/packages/y-json) Utility functions to mutate Yjs types according to a target JSON object
+- [`@sanalabs/json`](https://github.com/sanalabs/collaboration-kit/tree/main/packages/json) Utility functions to mutate, validate and diff JSON objects
 
 ## Documentation
 
-See each package for documentation. Links above 👆.
+See each package for documentation 👆
 
 ## Notes
 
