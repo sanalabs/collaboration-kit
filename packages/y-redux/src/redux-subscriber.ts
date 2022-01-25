@@ -4,11 +4,11 @@ import { Store, Unsubscribe } from 'redux'
  * Reference equality caching for store.subscribe
  *
  * The behefit of using store.subscribe is that it gives synchronous updates in contrast to `useSelector`
- * together with `useEffect`. The React life cycle allow other code to run before an effect triggers. This
- * causes a data race that is usually not noticed but for SyncYJson it is critical and results in data loss
- * since the selected data is diffed against the YDoc state to produce Yjs operations.
+ * together with `useEffect`. The React component lifecycle allows other code to run before an effect
+ * triggers. This causes a data race that is usually not noticed but for SyncYJson it is critical and may
+ * results in data loss since the selected data is diffed against the YDoc state to produce Yjs operations.
  *
- * See the Redux docs for more info: https://redux.js.org/api/store#example-1
+ * See the Redux docs for more info on store.subscribe: https://redux.js.org/api/store#subscribelistener
  */
 export const cachedSubscribe = <T>(
   store: Store,
