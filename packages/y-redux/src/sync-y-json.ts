@@ -28,6 +28,14 @@ function handleChange<T extends JsonTemplateContainer, RootState>(
   const syncRemoteIntoLocal = (): void => {
     const remoteData: unknown = yJson.toJSON()
     const localData = selectData(store.getState() as RootState)
+
+    if (_.isEqual(remoteData, {})) {
+      console.warn(
+        '[SyncYJson:syncRemoteIntoLocal] Not syncing: Received empty data {}. Is the YDoc not synced?',
+      )
+      return
+    }
+
     if (_.isEqual(remoteData, localData)) {
       console.debug('[SyncYJson:syncRemoteIntoLocal] Not syncing: Remote already equals local data')
       return

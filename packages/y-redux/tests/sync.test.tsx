@@ -20,7 +20,9 @@ type Action =
   | { type: 'send-message'; message: number }
   | { type: 'set-data'; data: Data }
 
-const reducer = (state: State = { status: 'loading' }, action: Action): State => {
+const initialState: State = { status: 'loading' }
+
+const reducer = (state: State = initialState, action: Action): State => {
   switch (action.type) {
     case 'set-data':
       return { status: 'loaded', data: action.data }
@@ -156,4 +158,24 @@ test('sync', async () => {
     expect(selectCount(store1.getState())).toBeGreaterThan(0)
     expect(store1.getState()).toEqual(store2.getState())
   })
+})
+
+test('warn on empty initial state', async () => {
+  const store = createStore(reducer)
+
+  const yDoc = new Y.Doc()
+  const yMap = yDoc.getMap()
+
+  const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
+
+  render(
+    <SyncStore store={store} yJson={yMap}>
+      <DispatchMessages />
+    </SyncStore>,
+  )
+
+  expect(console.warn).toHaveBeenCalledTimes(1)
+  consoleWarnMock.mockRestore()
+
+  expect(store.getState()).toEqual(initialState)
 })
