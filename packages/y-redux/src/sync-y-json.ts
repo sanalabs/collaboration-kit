@@ -27,6 +27,14 @@ function handleChange<T extends JsonTemplateContainer, RootState>(
   const syncRemoteIntoLocal = (): void => {
     const remoteData: unknown = yJson.toJSON()
     const localData = selectData(store.getState() as RootState)
+
+    if (_.isEqual(remoteData, {})) {
+      console.warn(
+        '[SyncYJson:syncRemoteIntoLocal] Not syncing: Received empty data {}. Is the document not synced?',
+      )
+      return
+    }
+
     if (_.isEqual(remoteData, localData)) {
       console.debug('[SyncYJson] remote data unchanged')
       return
@@ -74,7 +82,7 @@ export function SyncYJson<T extends JsonTemplateContainer, RootState>({
 
   useEffect(() => {
     // Sync the current local state up to this point
-    handleChange('local', store, selectData, setData, yJson)
+    handleChange('remote', store, selectData, setData, yJson)
 
     // Use store.subscribe to ensure we get synchronous updates. We cannot use `useSelector`, since that would
     // tie the updates to the react lifecycle, which may allow `yJson` to update before we push our changes.
