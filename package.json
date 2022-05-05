@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "clean:node_modules": "rm -rf */node_modules",
-    "clean:dist": "rm -rf */dist",
+    "clean:node_modules": "rm -rf packages/*/node_modules",
+    "clean:dist": "rm -rf packages/*/dist",
     "clean": "yarn run clean:node_modules && yarn run clean:dist",
     "check": "yarn run check:ts && yarn run check:format && yarn run check:lint",
     "check:format": "prettier --check packages *.md",
