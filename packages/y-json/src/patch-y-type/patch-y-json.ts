@@ -1,8 +1,8 @@
-import * as diffJson from '@sanalabs/json'
 import {
   deepNormalizeJson,
   Delta,
   DeltaType,
+  diff,
   isPlainArray,
   isPlainObject,
   JsonTemplateArray,
@@ -97,7 +97,7 @@ export function patchYJson(
   if (!isPlainArray(oldState) && !isPlainObject(oldState)) {
     throw new Error('Expected old state to be either an Array or an object')
   }
-  const delta = diffJson.diff(oldState, newState)
+  const delta = diff(oldState, newState)
   if (delta.operations.length === 0 || _.isEqual(oldState, newState)) return
 
   transact(
