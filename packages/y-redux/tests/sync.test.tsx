@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { patchYJson } from '@sanalabs/y-json'
+import { isEmpty, patchYJson } from '@sanalabs/y-json'
 import '@testing-library/jest-dom'
 import { render, waitFor } from '@testing-library/react'
 import _ from 'lodash'
@@ -85,6 +85,14 @@ const DispatchMessages: React.VFC = () => {
   return null
 }
 
+const fakeData: Data = { messages: [1], count: 1 }
+
+const InitializeFakeLoadedData: React.VFC = () => {
+  const dispatch = useDispatch()
+  dispatch({ type: 'set-data', data: fakeData })
+  return null
+}
+
 /**
  * This increments the state.data.count counter from 0 upwards until the test has ended.
  */
@@ -160,22 +168,21 @@ test('sync', async () => {
   })
 })
 
-test('warn on empty initial state', async () => {
+test('ignore syncing on empty remote', async () => {
   const store = createStore(reducer)
 
   const yDoc = new Y.Doc()
   const yMap = yDoc.getMap()
 
-  const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
-
   render(
     <SyncStore store={store} yJson={yMap}>
-      <DispatchMessages />
+      <InitializeFakeLoadedData />
     </SyncStore>,
   )
 
-  expect(console.warn).toHaveBeenCalledTimes(1)
-  consoleWarnMock.mockRestore()
-
-  expect(store.getState()).toEqual(initialState)
+  expect(store.getState()).toEqual({
+    data: fakeData,
+    status: 'loaded',
+  })
+  expect(isEmpty(yMap))
 })

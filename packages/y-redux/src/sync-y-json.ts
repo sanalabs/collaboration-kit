@@ -1,5 +1,5 @@
 import { JsonTemplateArray, JsonTemplateContainer, JsonTemplateObject } from '@sanalabs/json'
-import { patchYJson } from '@sanalabs/y-json'
+import { isEmpty, patchYJson } from '@sanalabs/y-json'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import { useStore } from 'react-redux'
@@ -16,6 +16,7 @@ function handleChange<T extends JsonTemplateContainer, RootState>(
 ): void {
   const syncLocalIntoRemote = (): void => {
     const localData = selectData(store.getState() as RootState)
+
     if (localData === undefined) {
       console.debug('[SyncYJson:syncLocalIntoRemote] Not syncing: Local data is undefined')
       return
@@ -29,13 +30,6 @@ function handleChange<T extends JsonTemplateContainer, RootState>(
     const remoteData: unknown = yJson.toJSON()
     const localData = selectData(store.getState() as RootState)
 
-    if (_.isEqual(remoteData, {})) {
-      console.warn(
-        '[SyncYJson:syncRemoteIntoLocal] Not syncing: Received empty data {}. Is the YDoc not synced?',
-      )
-      return
-    }
-
     if (_.isEqual(remoteData, localData)) {
       console.debug('[SyncYJson:syncRemoteIntoLocal] Not syncing: Remote already equals local data')
       return
@@ -43,6 +37,13 @@ function handleChange<T extends JsonTemplateContainer, RootState>(
 
     console.debug('[SyncYJson:syncRemoteIntoLocal] Syncing')
     store.dispatch(setData(remoteData as T))
+  }
+
+  if (isEmpty(yJson)) {
+    console.debug(
+      "[SyncYJson] Not syncing: Remote data is empty. The YDoc hasn't loaded yet, and syncing would overwrite remote data.",
+    )
+    return
   }
 
   if (source === 'local') {
